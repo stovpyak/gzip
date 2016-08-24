@@ -5,6 +5,8 @@ VisualStudioVersion = 14.0.24720.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZipLib", "ZipLib\ZipLib.csproj", "{B3728273-53B0-4A0D-85C3-4B8F1F8E486C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZipLib.Test", "ZipLib.Test\ZipLib.Test.csproj", "{F8203EBF-D2E9-4BE3-807C-35690F28CC69}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{B3728273-53B0-4A0D-85C3-4B8F1F8E486C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B3728273-53B0-4A0D-85C3-4B8F1F8E486C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B3728273-53B0-4A0D-85C3-4B8F1F8E486C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8203EBF-D2E9-4BE3-807C-35690F28CC69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8203EBF-D2E9-4BE3-807C-35690F28CC69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8203EBF-D2E9-4BE3-807C-35690F28CC69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8203EBF-D2E9-4BE3-807C-35690F28CC69}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

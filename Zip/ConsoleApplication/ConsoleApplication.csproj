@@ -4,15 +4,17 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{B3728273-53B0-4A0D-85C3-4B8F1F8E486C}</ProjectGuid>
-    <OutputType>Library</OutputType>
+    <ProjectGuid>{5E6427C0-7ED9-4E91-AF9B-0EDB92A88C2C}</ProjectGuid>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ZipLib</RootNamespace>
-    <AssemblyName>ZipLib</AssemblyName>
+    <RootNamespace>ConsoleApplication</RootNamespace>
+    <AssemblyName>ConsoleApplication</AssemblyName>
     <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -22,6 +24,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -40,22 +43,17 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Appl.cs" />
-    <Compile Include="FileNamePrividerStub.cs" />
-    <Compile Include="FilePart.cs" />
-    <Compile Include="IFileNameProvider.cs" />
-    <Compile Include="PartQueue.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="QueueHandlers\ArchiversRuner.cs" />
-    <Compile Include="QueueHandlers\PartInitializer.cs" />
-    <Compile Include="QueueHandlers\ReadersRuner.cs" />
-    <Compile Include="Strategies\IStrategy.cs" />
-    <Compile Include="Strategies\SmartStrategy.cs" />
-    <Compile Include="Strategies\StrategyStub.cs" />
-    <Compile Include="ThreadStop.cs" />
-    <Compile Include="Workers\Archiver.cs" />
-    <Compile Include="Workers\Reader.cs" />
-    <Compile Include="Writer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ZipLib\ZipLib.csproj">
+      <Project>{b3728273-53b0-4a0d-85c3-4b8f1f8e486c}</Project>
+      <Name>ZipLib</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

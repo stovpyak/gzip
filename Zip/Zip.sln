@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZipLib", "ZipLib\ZipLib.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZipLib.Test", "ZipLib.Test\ZipLib.Test.csproj", "{F8203EBF-D2E9-4BE3-807C-35690F28CC69}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleApplication", "ConsoleApplication\ConsoleApplication.csproj", "{5E6427C0-7ED9-4E91-AF9B-0EDB92A88C2C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{F8203EBF-D2E9-4BE3-807C-35690F28CC69}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F8203EBF-D2E9-4BE3-807C-35690F28CC69}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F8203EBF-D2E9-4BE3-807C-35690F28CC69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5E6427C0-7ED9-4E91-AF9B-0EDB92A88C2C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5E6427C0-7ED9-4E91-AF9B-0EDB92A88C2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5E6427C0-7ED9-4E91-AF9B-0EDB92A88C2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5E6427C0-7ED9-4E91-AF9B-0EDB92A88C2C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

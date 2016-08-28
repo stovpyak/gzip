@@ -1,20 +1,27 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Threading;
+using ZipLib.Loggers;
+using ZipLib.QueueHandlers;
+using ZipLib.Queues;
 
 namespace ZipLib.Workers
 {
     public class Archiver
     {
-        private readonly FilePart _part;
         private readonly Thread _thread;
-        private readonly PartQueue _nextQueue;
+        private readonly ILogger _logger;
+        private ArchiversStatistic _statistic;
 
-        public Archiver(string name, FilePart part, PartQueue nextQueue)
+        private readonly FilePart _part;
+        private readonly IndexedParts _nextQueue;
+
+        public Archiver(string name, ILogger logger, ArchiversStatistic statistic, FilePart part, IndexedParts nextQueue)
         {
+            _logger = logger;
             _part = part;
+            _statistic = statistic;
             _nextQueue = nextQueue;
 
             _thread = new Thread(this.Run) { Name = name };
@@ -27,18 +34,18 @@ namespace ZipLib.Workers
 
         private void Run()
         {
-            Console.WriteLine($"Поток {Thread.CurrentThread.Name} начал архивировать");
+            _logger.Add($"Поток {Thread.CurrentThread.Name} начал архивировать");
             var stopWatch = new Stopwatch();
             stopWatch.Start();
 
             Compress();
 
             stopWatch.Stop();
-            Console.WriteLine($"Поток {Thread.CurrentThread.Name} закончил архивировать part {_part.Name} за {stopWatch.ElapsedMilliseconds} ms");
+            _logger.Add($"Поток {Thread.CurrentThread.Name} закончил архивировать part {_part} за {stopWatch.ElapsedMilliseconds} ms");
+            _statistic.Add(_thread.Name, stopWatch.ElapsedMilliseconds);
 
-            _nextQueue?.Enqueue(_part);
+            _nextQueue?.Add(_part);
         }
-
 
         public void Compress()
         {

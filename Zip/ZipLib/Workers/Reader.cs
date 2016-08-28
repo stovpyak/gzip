@@ -2,18 +2,23 @@
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
+using ZipLib.Loggers;
+using ZipLib.Queues;
 
 namespace ZipLib.Workers
 {
     public class Reader
-    { 
+    {
+        private readonly ILogger _logger;
         private readonly string _sourceFileName;
+
         private readonly FilePart _part;
         private readonly Thread _thread;
-        private readonly PartQueue _nextQueue;
+        private readonly IQueue _nextQueue;
 
-        public Reader(string name, string sourceFileName, FilePart part, PartQueue nextQueue)
+        public Reader(string name, ILogger logger, string sourceFileName, FilePart part, IQueue nextQueue)
         {
+            _logger = logger;
             _sourceFileName = sourceFileName;
             _part = part;
             _nextQueue = nextQueue;
@@ -28,10 +33,10 @@ namespace ZipLib.Workers
 
         private void Run()
         {
-            Console.WriteLine($"Поток {Thread.CurrentThread.Name} начал читать");
+            _logger.Add($"Поток {Thread.CurrentThread.Name} начал читать");
+
             var stopWatch = new Stopwatch();
             stopWatch.Start();
-            //var start = DateTime.Now;
 
             var fsInput = new FileStream(_sourceFileName, FileMode.Open, FileAccess.Read);
             try
@@ -39,19 +44,15 @@ namespace ZipLib.Workers
                 if (_part.StartPosition != 0)
                     fsInput.Seek(_part.StartPosition, SeekOrigin.Begin);
 
-                _part.Source = new Byte[_part.Size];
-                var count = fsInput.Read(_part.Source, 0, _part.Size);
+                _part.Source = new Byte[_part.SourceSize];
+                var count = fsInput.Read(_part.Source, 0, _part.SourceSize);
 
                 stopWatch.Stop();
-                //var finish = DateTime.Now;
-                Console.WriteLine("{0} прочитал {1} byte за {2} ms", _thread.Name, count, stopWatch.ElapsedMilliseconds);
-                //Console.WriteLine("{0} начал в {1}", _thread.Name, start.Ticks);
-                //Console.WriteLine("{0} закончил в {1}", _thread.Name, finish.Ticks);
-                //Console.WriteLine("{0} время {1}", _thread.Name, finish - start);
+                _logger.Add($"Поток {Thread.CurrentThread.Name} прочитал в часть {_part} {count} byte за {stopWatch.ElapsedMilliseconds} ms");
             }
             catch (Exception)
             {
-                Console.WriteLine($"Поток {Thread.CurrentThread.Name} - ошибка при чтении");
+                _logger.Add($"Поток {Thread.CurrentThread.Name} - ошибка при чтении");
                 throw;
             }
             finally
@@ -60,8 +61,8 @@ namespace ZipLib.Workers
             }
 
             // сам reader помещает part в следующую очередь
-            _nextQueue?.Enqueue(_part);
-            Console.WriteLine($"Поток {Thread.CurrentThread.Name} завершил свой run");
+            _nextQueue?.Add(_part);
+            _logger.Add($"Поток {Thread.CurrentThread.Name} завершил свой run");
         }
     }
 }

@@ -1,10 +1,10 @@
 ﻿namespace ZipLib
 {
-    public class FileNamePrividerStub: IFileNameProvider
+    public class FileNameProviderStub: IFileNameProvider
     {
         private readonly string _fileName;
 
-        public FileNamePrividerStub(string fileName)
+        public FileNameProviderStub(string fileName)
         {
             _fileName = fileName;
         }

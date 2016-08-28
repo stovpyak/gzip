@@ -2,19 +2,24 @@
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
+using ZipLib.Loggers;
+using ZipLib.Queues;
 
-namespace ZipLib
+namespace ZipLib.Workers
 {
     public class Writer
     {
         private readonly ThreadStop _threadStop;
-        private readonly PartQueue _sourceQueue;
+        private readonly ILogger _logger;
+
+        private readonly IndexedParts _sourceQueue;
         private readonly PartQueue _nextQueue;
         private readonly string _targetFileName;
 
-        public Writer(ThreadStop threadStop, string targetFileName, PartQueue sourceQueue, PartQueue nextQueue)
+        public Writer(ThreadStop threadStop, ILogger logger, string targetFileName, IndexedParts sourceQueue, PartQueue nextQueue)
         {
             _threadStop = threadStop;
+            _logger = logger;
             _sourceQueue = sourceQueue;
             _nextQueue = nextQueue;
             _targetFileName = targetFileName;
@@ -34,33 +39,37 @@ namespace ZipLib
             return _targetStream;
         }
 
+        private int _partCount;
+        private int _currentPartIndex;
+
         private void Run()
         {
             while (!_threadStop.IsNeedStop)
             {
                 // для writera важен порядок/очередность частей!
-                var part = _sourceQueue.GetPart();
+                var part = _sourceQueue.GetPartByIndex(_currentPartIndex);
                 if (part != null)
                 {
-                    Console.WriteLine($"Поток {Thread.CurrentThread.Name} получил part {part.Name}");
+                    _logger.Add($"Поток {Thread.CurrentThread.Name} получил part {part}");
                     var stopWatch = new Stopwatch();
                     stopWatch.Start();
 
-                    var target = GetOrMakeStream();
-                    target.Write(part.Result, 0, part.Result.Length);
+                    GetOrMakeStream().Write(part.Result, 0, part.Result.Length);
+                    _partCount++;
 
                     stopWatch.Stop();
-                    Console.WriteLine($"Поток {Thread.CurrentThread.Name} записал part {part.Name} за {stopWatch.ElapsedMilliseconds} ms");
+                    _logger.Add($"Поток {Thread.CurrentThread.Name} записал part {part} за {stopWatch.ElapsedMilliseconds} ms");
 
                     part.Result = null;
                     _nextQueue.Enqueue(part);
+
+                    _currentPartIndex++;
                 }
             }
-            var target2 = GetOrMakeStream();
-            target2.Flush();
-            target2.Close();
+            GetOrMakeStream().Close();
 
-            Console.WriteLine($"Поток {Thread.CurrentThread.Name} завершил свой run");
+            _logger.Add($"Поток {Thread.CurrentThread.Name} завершил свой run");
+            _logger.Add($"Поток {Thread.CurrentThread.Name} записано {_partCount} частей");
         }
     }
 }

@@ -1,5 +1,6 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
+using ZipLib.Loggers;
+using ZipLib.Queues;
 using ZipLib.Workers;
 
 namespace ZipLib.QueueHandlers
@@ -7,13 +8,16 @@ namespace ZipLib.QueueHandlers
     public class ArchiversRuner
     {
         private readonly ThreadStop _threadStop;
-        private readonly PartQueue _sourceQueue;
-        private readonly PartQueue _nextQueue;
+        private readonly ILogger _logger;
+
+        private readonly IQueue _sourceQueue;
+        private readonly IndexedParts _nextQueue;
         
 
-        public ArchiversRuner(ThreadStop threadStop, PartQueue sourceQueue, PartQueue nextQueue)
+        public ArchiversRuner(ThreadStop threadStop, ILogger logger, IQueue sourceQueue, IndexedParts nextQueue)
         {
             _threadStop = threadStop;
+            _logger = logger;
             _sourceQueue = sourceQueue;
             _nextQueue = nextQueue;
             var thread = new Thread(this.Run) { Name = "ArchiversRuner" };
@@ -29,14 +33,15 @@ namespace ZipLib.QueueHandlers
                 var part = _sourceQueue.GetPart();
                 if (part != null)
                 {
-                    var archiverName = "ArchiverN" + _archiversCount;
-                    var archiver = new Archiver(archiverName, part, _nextQueue);
-                    Console.WriteLine($"Поток {Thread.CurrentThread.Name} отдал part {part.Name} archiver`у {archiverName}");
                     _archiversCount++;
+                    var archiverName = "ArchiverN" + _archiversCount;
+                    var archiver = new Archiver(archiverName, _logger, part, _nextQueue);
+                    _logger.Add($"Поток {Thread.CurrentThread.Name} отдал part {part.Name} archiver`у {archiverName}");
                     archiver.Start();
                 }
             }
-            Console.WriteLine($"Поток {Thread.CurrentThread.Name} завершил свой run");
+            _logger.Add($"Поток {Thread.CurrentThread.Name} завершил свой run");
+            _logger.Add($"Поток {Thread.CurrentThread.Name} заархивированно {_archiversCount} частей");
         }
     }
 }

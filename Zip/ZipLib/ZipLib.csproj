@@ -44,19 +44,26 @@
     <Compile Include="FileNamePrividerStub.cs" />
     <Compile Include="FilePart.cs" />
     <Compile Include="IFileNameProvider.cs" />
-    <Compile Include="PartQueue.cs" />
+    <Compile Include="Loggers\ILogger.cs" />
+    <Compile Include="Loggers\LoggerDummy.cs" />
+    <Compile Include="Loggers\LoggerStringList.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueueHandlers\ArchiversRuner.cs" />
     <Compile Include="QueueHandlers\PartInitializer.cs" />
     <Compile Include="QueueHandlers\ReadersRuner.cs" />
+    <Compile Include="Queues\IQueue.cs" />
+    <Compile Include="Queues\PartQueue.cs" />
+    <Compile Include="Queues\IndexedParts.cs" />
+    <Compile Include="StopToken.cs" />
     <Compile Include="Strategies\IStrategy.cs" />
     <Compile Include="Strategies\SmartStrategy.cs" />
     <Compile Include="Strategies\StrategyStub.cs" />
     <Compile Include="ThreadStop.cs" />
     <Compile Include="Workers\Archiver.cs" />
     <Compile Include="Workers\Reader.cs" />
-    <Compile Include="Writer.cs" />
+    <Compile Include="Workers\Writer.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

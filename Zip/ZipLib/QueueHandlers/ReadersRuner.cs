@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Threading;
+using ZipLib.Loggers;
+using ZipLib.Queues;
 using ZipLib.Workers;
 
 namespace ZipLib.QueueHandlers
@@ -7,13 +9,16 @@ namespace ZipLib.QueueHandlers
     public class ReadersRuner
     {
         private readonly ThreadStop _threadStop;
-        private readonly IFileNameProvider _sourceFileNameProvider;
-        private readonly PartQueue _sourceQueue;
-        private readonly PartQueue _nextQueue;
+        private readonly ILogger _logger;
 
-        public ReadersRuner(ThreadStop threadStop, IFileNameProvider sourceFileNameProvider, PartQueue sourceQueue, PartQueue nextQueue)
+        private readonly IFileNameProvider _sourceFileNameProvider;
+        private readonly IQueue _sourceQueue;
+        private readonly IQueue _nextQueue;
+
+        public ReadersRuner(ThreadStop threadStop, ILogger logger, IFileNameProvider sourceFileNameProvider, IQueue sourceQueue, IQueue nextQueue)
         {
             _threadStop = threadStop;
+            _logger = logger;
             _sourceFileNameProvider = sourceFileNameProvider;
             _sourceQueue = sourceQueue;
             _nextQueue = nextQueue;
@@ -22,7 +27,7 @@ namespace ZipLib.QueueHandlers
             thread.Start();
         }
 
-        private int _readersCount = 0;
+        private int _readersCount;
         private void Run()
         {
             while (!_threadStop.IsNeedStop)
@@ -31,14 +36,16 @@ namespace ZipLib.QueueHandlers
                 var part = _sourceQueue.GetPart();
                 if (part != null)
                 {
-                    var readerName = "ReaderN" + _readersCount;
-                    var reader = new Reader(readerName, _sourceFileNameProvider.GetFileName(), part, _nextQueue);
-                    Console.WriteLine($"Поток {Thread.CurrentThread.Name} отдал part {part.Name} reader`у {readerName}");
                     _readersCount++;
+                    var readerName = "ReaderN" + _readersCount;
+                    var reader = new Reader(readerName, _logger, _sourceFileNameProvider.GetFileName(), part, _nextQueue);
+                    _logger.Add($"Поток {Thread.CurrentThread.Name} отдал part {part.Name} reader`у {readerName}");
+                    
                     reader.Start();
                 }
             }
-            Console.WriteLine($"Поток {Thread.CurrentThread.Name} завершил свой run");
+            _logger.Add($"Поток {Thread.CurrentThread.Name} завершил свой run");
+            _logger.Add($"Поток {Thread.CurrentThread.Name} прочитано {_readersCount} частей");
         }
     }
 }

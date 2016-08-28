@@ -1,5 +1,7 @@
 ﻿using System.IO;
 using System.IO.Compression;
+using System.Linq;
+using System.Security.Cryptography;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace ZipLib.Test
@@ -10,6 +12,7 @@ namespace ZipLib.Test
         private void TestCompressDecompress(string sourceFileName, 
             string compressedFileName, string decompressedNewFileName)
         {
+
             // prepare
             if (File.Exists(compressedFileName))
                 File.Delete(compressedFileName);
@@ -86,6 +89,30 @@ namespace ZipLib.Test
                     }
                 }
             }
+        }
+
+        [TestMethod]
+        public void TestFileEquals()
+        {
+            var firstFileName = "..\\..\\..\\ConsoleApplication\\bin\\Debug\\data_g1.txt";
+            var firstMd5 = GetFileMd5(firstFileName);
+
+            var secondFileName = "..\\..\\..\\ConsoleApplication\\bin\\Debug\\data_g1_res.txt";
+            var secondMd5 = GetFileMd5(secondFileName);
+
+            var res = firstMd5.SequenceEqual(secondMd5);
+            Assert.IsTrue(res, "файлы не равны");
+        }
+
+        private byte[] GetFileMd5(string fileName)
+        {
+            byte[] md5;
+            using (var firstFileStream = new FileStream(fileName, FileMode.Open))
+            {
+                MD5 md = MD5.Create();
+                md5 = md.ComputeHash(firstFileStream);
+            }
+            return md5;
         }
     }
 }

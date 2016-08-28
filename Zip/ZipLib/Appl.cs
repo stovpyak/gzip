@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Remoting.Channels;
 using System.Threading;
+using ZipLib.Loggers;
 using ZipLib.QueueHandlers;
+using ZipLib.Queues;
 using ZipLib.Strategies;
+using ZipLib.Workers;
 
 namespace ZipLib
 {
@@ -14,10 +17,10 @@ namespace ZipLib
         private readonly IFileNameProvider _sourceFileNameProvider;
         private readonly IFileNameProvider _targetFileNameProvider;
 
-        private readonly PartQueue _queueEmpty = new PartQueue("Empty");
-        private readonly PartQueue _queueForReaders = new PartQueue("ForReaders");
-        private readonly PartQueue _queueForArchivers = new PartQueue("ForArchivers");
-        private readonly PartQueue _queueForWriter = new PartQueue("ForWriter");
+        private PartQueue _queueEmpty;
+        private PartQueue _queueForReaders;
+        private PartQueue _queueForArchivers;
+        private IndexedParts _queueForWriter;
 
         public Appl(IStrategy strategy, IFileNameProvider sourceFileNameProvider, IFileNameProvider targetFileNameProvider)
         {
@@ -26,51 +29,99 @@ namespace ZipLib
             _targetFileNameProvider = targetFileNameProvider;
         }
 
-        private ThreadStop _stopWriter;
-        private ThreadStop _stopArchiversRuner;
+        private StopToken _stopToken;
+
+        private ThreadStop _writerStop;
+        private LoggerStringList _writerLogger;
+
+        private ThreadStop _archiversRunerStop;
+        private LoggerStringList _archiversLogger;
+
         private ThreadStop _stopReadersRuner;
+        private LoggerStringList _readersLogger;
+
         private ThreadStop _stopPartInitializer;
+        private LoggerStringList _partInitializerLogger;
 
         public void Run()
         {
             Thread.CurrentThread.Name = "Main";
 
-            var sourceFileName = _sourceFileNameProvider.GetFileName();
-            var sourceFileInfo = new FileInfo(sourceFileName);
+            var loggerForQueue = new LoggerDummy();
+            _queueEmpty = new PartQueue("Empty", loggerForQueue);
+            _queueForReaders = new PartQueue("ForReaders", loggerForQueue);
+            _queueForArchivers = new PartQueue("ForArchivers", loggerForQueue);
+            _queueForWriter = new IndexedParts("ForWriter", loggerForQueue);
 
-            _stopWriter = new ThreadStop();
-            var writer = new Writer(_stopWriter, _targetFileNameProvider.GetFileName(), _queueForWriter, _queueEmpty);
+            _writerStop = new ThreadStop();
+            _writerLogger = new LoggerStringList();
+            var writer = new Writer(_writerStop, _writerLogger, _targetFileNameProvider.GetFileName(), _queueForWriter, _queueEmpty);
 
-            _stopArchiversRuner = new ThreadStop();
-            var archiversRuner = new ArchiversRuner(_stopArchiversRuner, _queueForArchivers, _queueForWriter);
+            _archiversRunerStop = new ThreadStop();
+            _archiversLogger = new LoggerStringList();
+            var archiversRuner = new ArchiversRuner(_archiversRunerStop, _archiversLogger, _queueForArchivers, _queueForWriter);
 
             _stopReadersRuner = new ThreadStop();
-            var readersRuner = new ReadersRuner(_stopReadersRuner, _sourceFileNameProvider, _queueForReaders, _queueForArchivers);
+            _readersLogger = new LoggerStringList();
+            var readersRuner = new ReadersRuner(_stopReadersRuner, _readersLogger, _sourceFileNameProvider, _queueForReaders, _queueForArchivers);
 
             _stopPartInitializer = new ThreadStop();
-            var partInitializer = new PartInitializer(_stopPartInitializer, _strategy, _queueEmpty, _queueForReaders);
+            _partInitializerLogger = new LoggerStringList();
+            _stopToken = new StopToken();
+            var partInitializer = new PartInitializer(_stopPartInitializer, _partInitializerLogger, _stopToken, _strategy, _queueEmpty, _queueForReaders);
+
+            var sourceFileName = _sourceFileNameProvider.GetFileName();
+            var sourceFileInfo = new FileInfo(sourceFileName);
+            Console.WriteLine($"Размер файла {sourceFileInfo.Length} byte");
 
             _strategy.StartFile(sourceFileInfo.Length);
             var maxActivePartCount = _strategy.GetMaxActivePartCount();
+            Console.WriteLine($"Максимальное кол-во одновременно обрабатываемых частей {maxActivePartCount} шт.");
+            Console.WriteLine($"Всего частей {_strategy.GetPartCount()} шт.");
+            Console.WriteLine("Для начала архивирования нажмите любую клавишу...");
+            Console.ReadKey();
+
             for (int i = 0; i < maxActivePartCount; i++)
             {
-                var part = new FilePart {Name = i.ToString()};
+                var part = new FilePart($"FilePart{i+1}");
                 _queueEmpty.Enqueue(part);
             }
+
+            // здесь выполнение остановится, пока ктонибудь (partInitializer) не просигнализирует об окончании работы
+            _stopToken.GetEnd();
+
+            ShowInfo();
+            Stop();
         }
 
         public void ShowInfo()
         {
+            Console.WriteLine("Отчет о работе:");
             Console.WriteLine($"очередь {_queueEmpty.Name} Count {_queueEmpty.Count}");
             Console.WriteLine($"очередь {_queueForReaders.Name} Count {_queueForReaders.Count}");
             Console.WriteLine($"очередь {_queueForArchivers.Name} Count {_queueForArchivers.Count}");
             Console.WriteLine($"очередь {_queueForWriter.Name} Count {_queueForWriter.Count}");
+
+            Console.WriteLine("Readers:");
+            var items = _readersLogger.Items;
+            foreach (var item in items)
+                Console.WriteLine(item);
+
+            Console.WriteLine("Archivers:");
+            items = _archiversLogger.Items;
+            foreach (var item in items)
+                Console.WriteLine(item);
+            
+            Console.WriteLine("Writer:");
+            items = _writerLogger.Items;
+            foreach (var item in items)
+                Console.WriteLine(item);
         }
 
         public void Stop()
         {
-            _stopWriter.IsNeedStop = true;
-            _stopArchiversRuner.IsNeedStop = true;
+            _writerStop.IsNeedStop = true;
+            _archiversRunerStop.IsNeedStop = true;
             _stopReadersRuner.IsNeedStop = true;
             _stopPartInitializer.IsNeedStop = true;
 

@@ -6,6 +6,6 @@
 
         FilePart GetPart();
 
-        void Enqueue(FilePart part);
+        void Add(FilePart part);
     }
 }

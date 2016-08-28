@@ -40,7 +40,7 @@ namespace ZipLib.Strategies
 
         public int GetMaxActivePartCount()
         {
-            return Environment.ProcessorCount;
+            return Convert.ToInt32(Environment.ProcessorCount * 1.3);
         }
 
         public long GetPartCount()
@@ -48,12 +48,18 @@ namespace ZipLib.Strategies
             return _partCount;
         }
 
+        /// <summary>
+        /// Возвращает доступный объем памяти для приложения
+        /// </summary>
+        /// <returns></returns>
         private long GetAvailableMemoryForAppl()
         {
-            // пока 2 ГБ - отведенные для 32битного приложения.
+            // В 32 - битных программах размер динамически выделяемой памяти ограничен 2 GB, в 64 - битных — 8 TB.
             // потом нужно учтитывать, что оперативки может быть на машине меньше
-            var oneGb = 1024 * 1024 * 1024;
-            long valueInGb = oneGb * 2;
+
+            long oneGb = 1024 * 1024 * 1024;
+            var value = oneGb * 1.6;
+            long valueInGb = Convert.ToInt64(value);
             return valueInGb;
         }
 

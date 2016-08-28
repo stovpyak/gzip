@@ -1,6 +1,4 @@
-﻿using System.IO;
-
-namespace ZipLib
+﻿namespace ZipLib
 {
     public class FilePart
     {

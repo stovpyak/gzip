@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using ZipLib.Loggers;
@@ -61,7 +60,7 @@ namespace ZipLib.Workers
                     _logger.Add($"Поток {Thread.CurrentThread.Name} записал part {part} за {stopWatch.ElapsedMilliseconds} ms");
 
                     part.Result = null;
-                    _nextQueue.Enqueue(part);
+                    _nextQueue.Add(part);
 
                     _currentPartIndex++;
                 }

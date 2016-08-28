@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
-using System.Runtime.Remoting.Channels;
 using System.Threading;
 using ZipLib.Loggers;
 using ZipLib.QueueHandlers;
@@ -22,14 +21,7 @@ namespace ZipLib
         private PartQueue _queueForArchivers;
         private IndexedParts _queueForWriter;
 
-        public Appl(IStrategy strategy, IFileNameProvider sourceFileNameProvider, IFileNameProvider targetFileNameProvider)
-        {
-            _strategy = strategy;
-            _sourceFileNameProvider = sourceFileNameProvider;
-            _targetFileNameProvider = targetFileNameProvider;
-        }
-
-        private StopToken _stopToken;
+        private ManualResetEventSlim _stopEvent;
 
         private ThreadStop _writerStop;
         private LoggerStringList _writerLogger;
@@ -42,6 +34,13 @@ namespace ZipLib
 
         private ThreadStop _stopPartInitializer;
         private LoggerStringList _partInitializerLogger;
+
+        public Appl(IStrategy strategy, IFileNameProvider sourceFileNameProvider, IFileNameProvider targetFileNameProvider)
+        {
+            _strategy = strategy;
+            _sourceFileNameProvider = sourceFileNameProvider;
+            _targetFileNameProvider = targetFileNameProvider;
+        }
 
         public void Run()
         {
@@ -67,8 +66,8 @@ namespace ZipLib
 
             _stopPartInitializer = new ThreadStop();
             _partInitializerLogger = new LoggerStringList();
-            _stopToken = new StopToken();
-            var partInitializer = new PartInitializer(_stopPartInitializer, _partInitializerLogger, _stopToken, _strategy, _queueEmpty, _queueForReaders);
+            _stopEvent = new ManualResetEventSlim(false);
+            var partInitializer = new PartInitializer(_stopPartInitializer, _partInitializerLogger, _stopEvent, _strategy, _queueEmpty, _queueForReaders);
 
             var sourceFileName = _sourceFileNameProvider.GetFileName();
             var sourceFileInfo = new FileInfo(sourceFileName);
@@ -80,18 +79,24 @@ namespace ZipLib
             Console.WriteLine($"Всего частей {_strategy.GetPartCount()} шт.");
             Console.WriteLine("Для начала архивирования нажмите любую клавишу...");
             Console.ReadKey();
+            Console.WriteLine($"Работа начата...");
+
+            var stopWatch = new Stopwatch();
+            stopWatch.Start();
 
             for (int i = 0; i < maxActivePartCount; i++)
             {
                 var part = new FilePart($"FilePart{i+1}");
-                _queueEmpty.Enqueue(part);
+                _queueEmpty.Add(part);
             }
 
-            // здесь выполнение остановится, пока ктонибудь (partInitializer) не просигнализирует об окончании работы
-            _stopToken.GetEnd();
-
-            ShowInfo();
+            // здесь выполнение остановится, пока кто нибудь не просигнализирует об окончании работы
+            _stopEvent.Wait();
+            stopWatch.Stop();
+            
             Stop();
+            ShowInfo();
+            Console.WriteLine($"Работа завершена. Общее время работы {stopWatch.ElapsedMilliseconds} ms");
         }
 
         public void ShowInfo()
@@ -112,10 +117,10 @@ namespace ZipLib
             foreach (var item in items)
                 Console.WriteLine(item);
             
-            Console.WriteLine("Writer:");
-            items = _writerLogger.Items;
-            foreach (var item in items)
-                Console.WriteLine(item);
+            //Console.WriteLine("Writer:");
+            //items = _writerLogger.Items;
+            //foreach (var item in items)
+            //    Console.WriteLine(item);
         }
 
         public void Stop()
@@ -125,10 +130,10 @@ namespace ZipLib
             _stopReadersRuner.IsNeedStop = true;
             _stopPartInitializer.IsNeedStop = true;
 
-            _queueEmpty.Unlock();
-            _queueForReaders.Unlock();
-            _queueForArchivers.Unlock();
-            _queueForWriter.Unlock();
+            _queueEmpty.NotifyEndWait();
+            _queueForReaders.NotifyEndWait();
+            _queueForArchivers.NotifyEndWait();
+            _queueForWriter.NotifyEndWait();
         }
     }
 }

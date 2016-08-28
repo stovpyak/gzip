@@ -48,7 +48,7 @@ namespace ZipLib.Workers
                 var count = fsInput.Read(_part.Source, 0, _part.SourceSize);
 
                 stopWatch.Stop();
-                _logger.Add($"Поток {Thread.CurrentThread.Name} прочитал {count} byte за {stopWatch.ElapsedMilliseconds} ms");
+                _logger.Add($"Поток {Thread.CurrentThread.Name} прочитал в часть {_part} {count} byte за {stopWatch.ElapsedMilliseconds} ms");
             }
             catch (Exception)
             {
@@ -61,7 +61,7 @@ namespace ZipLib.Workers
             }
 
             // сам reader помещает part в следующую очередь
-            _nextQueue?.Enqueue(_part);
+            _nextQueue?.Add(_part);
             _logger.Add($"Поток {Thread.CurrentThread.Name} завершил свой run");
         }
     }

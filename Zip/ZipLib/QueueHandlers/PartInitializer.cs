@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using ZipLib.Loggers;
 using ZipLib.Queues;
 using ZipLib.Strategies;
@@ -10,17 +9,17 @@ namespace ZipLib.QueueHandlers
     {
         private readonly ThreadStop _threadStop;
         private readonly ILogger _logger;
-        private readonly StopToken _stopToken;
+        private readonly ManualResetEventSlim _stopEvent;
 
         private readonly IStrategy _strategy;
         private readonly IQueue _sourceQueue;
         private readonly IQueue _nextQueue;
 
-        public PartInitializer(ThreadStop threadStop, ILogger logger, StopToken stopToken, IStrategy strategy, IQueue sourceQueue, IQueue nextQueue)
+        public PartInitializer(ThreadStop threadStop, ILogger logger, ManualResetEventSlim stopEvent, IStrategy strategy, IQueue sourceQueue, IQueue nextQueue)
         {
             _threadStop = threadStop;
             _logger = logger;
-            _stopToken = stopToken;
+            _stopEvent = stopEvent;
 
             _strategy = strategy;
             _sourceQueue = sourceQueue;
@@ -43,22 +42,22 @@ namespace ZipLib.QueueHandlers
                 if (part != null)
                 {
                     _logger.Add(
-                        $"Поток {Thread.CurrentThread.Name} получил из очереди {_sourceQueue.Name} part {part.Name}");
+                        $"Поток {Thread.CurrentThread.Name} получил из очереди {_sourceQueue.Name} part {part}");
                     if (_strategy.InitNextFilePart(part))
                     {
-                        _logger.Add($"Поток {Thread.CurrentThread.Name} проинициализировал part {part.Name}");
-                        _nextQueue.Enqueue(part);
+                        _logger.Add($"Поток {Thread.CurrentThread.Name} проинициализировал part {part}");
+                        _nextQueue.Add(part);
                         _partCount++;
                     }
                     else
                     {
-                        _logger.Add($"!Поток {Thread.CurrentThread.Name} НЕ проинициализировал part {part.Name} - исходный файл прочитан");
+                        _logger.Add($"!Поток {Thread.CurrentThread.Name} НЕ проинициализировал part {part} - исходный файл прочитан");
                         _removedPartCount++;
                         if (_removedPartCount == _strategy.GetMaxActivePartCount())
                         {
                             _logger.Add(
                                 $"!Поток {Thread.CurrentThread.Name} Выведены все обрабатываемые части {_removedPartCount} шт. - это признак того, что работа завершена");
-                            _stopToken.OnEventEnd();
+                            _stopEvent.Set();
                         }
                     }
                 }

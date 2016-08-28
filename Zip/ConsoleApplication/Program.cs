@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
-using System.IO;
 using ZipLib;
 using ZipLib.Strategies;
 
@@ -21,9 +19,10 @@ namespace ConsoleApplication
             //var targetFileName = "data_mb100.gz";
 
             //var strategy = new SmartStrategy();
-            var strategy = StrategyStub.MakeByPartSize(4, 100 * 1024 * 1024);
-            var sourceFileNameProfiler = new FileNamePrividerStub(sourceFileName);
-            var targetFileNameProfiler = new FileNamePrividerStub(targetFileName);
+            //var strategy = StrategyStub.MakeByPartSize(4, 100 * 1024 * 1024);
+            var strategy = StrategyStub.MakeByPartCount(5, 8);
+            var sourceFileNameProfiler = new FileNameProviderStub(sourceFileName);
+            var targetFileNameProfiler = new FileNameProviderStub(targetFileName);
 
             var appl = new Appl(strategy, sourceFileNameProfiler, targetFileNameProfiler);
             appl.Run();

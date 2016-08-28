@@ -12,7 +12,7 @@ namespace ZipLib.QueueHandlers
 
         private readonly IQueue _sourceQueue;
         private readonly IndexedParts _nextQueue;
-        
+        private readonly ArchiversStatistic _statistic = new ArchiversStatistic();
 
         public ArchiversRuner(ThreadStop threadStop, ILogger logger, IQueue sourceQueue, IndexedParts nextQueue)
         {
@@ -35,13 +35,14 @@ namespace ZipLib.QueueHandlers
                 {
                     _archiversCount++;
                     var archiverName = "ArchiverN" + _archiversCount;
-                    var archiver = new Archiver(archiverName, _logger, part, _nextQueue);
-                    _logger.Add($"Поток {Thread.CurrentThread.Name} отдал part {part.Name} archiver`у {archiverName}");
+                    var archiver = new Archiver(archiverName, _logger, _statistic, part, _nextQueue);
+                    _logger.Add($"Поток {Thread.CurrentThread.Name} отдал part {part} archiver`у {archiverName}");
                     archiver.Start();
                 }
             }
             _logger.Add($"Поток {Thread.CurrentThread.Name} завершил свой run");
             _logger.Add($"Поток {Thread.CurrentThread.Name} заархивированно {_archiversCount} частей");
+            _logger.Add($"Поток {Thread.CurrentThread.Name} среднее время архивирования одной части {_statistic.GetMiddleElapsedTime()} ms");
         }
     }
 }

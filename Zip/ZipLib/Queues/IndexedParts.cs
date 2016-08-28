@@ -1,79 +1,57 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 using ZipLib.Loggers;
 
 namespace ZipLib.Queues
 {
-    public class IndexedParts
+    public class IndexedParts: PartsBase
     {
-        private readonly string _name;
-        private readonly ILogger _logger;
-
         private readonly Dictionary<int, FilePart> _indexToPartDict = new Dictionary<int, FilePart>();
-        private readonly object _lockOn = new object();
-        
 
-        public IndexedParts(string name, ILogger logger)
+        public IndexedParts(string name, ILogger logger): base(name, logger)
         {
-            _name = name;
-            _logger = logger;
         }
 
-        public string Name => _name;
+        public override int Count => _indexToPartDict.Count;
 
-        public int Count => _indexToPartDict.Count;
-
-        public void Add(FilePart part)
+        public override void Add(FilePart part)
         {
-            lock (_lockOn)
+            lock (LockOn)
             {
                 _indexToPartDict.Add(part.Index, part);
-                _logger.Add($"Поток {Thread.CurrentThread.Name} в очереди {_name} поместил в очередь элемент {part}");
-                Monitor.Pulse(_lockOn);
+                Logger.Add($"Поток {Thread.CurrentThread.Name} в очереди {Name} поместил в очередь элемент {part}");
+                Monitor.Pulse(LockOn);
             }
         }
 
         public FilePart GetPartByIndex(int index)
         {
-            lock (_lockOn)
+            lock (LockOn)
             {
                 FilePart part;
                 if ((_indexToPartDict.Count > 0) && (_indexToPartDict.TryGetValue(index, out part)))
                 {
-                    _logger.Add($"Поток {Thread.CurrentThread.Name} в очереди {_name}. Есть элемент c индексом {index} - извлек элемент сразу");
+                    Logger.Add($"Поток {Thread.CurrentThread.Name} в очереди {Name}. Есть элемент c индексом {index} - извлек элемент сразу");
                     _indexToPartDict.Remove(index);
                     return part;
                 }
-                else
+                Monitor.Pulse(LockOn);
+                Monitor.Wait(LockOn);
+                if (_indexToPartDict.Count > 0)
                 {
-                    _logger.Add($"Поток {Thread.CurrentThread.Name} в очереди {_name} нет элементов - вызывает Pulse");
-                    Monitor.Pulse(_lockOn);
-                    _logger.Add($"Поток {Thread.CurrentThread.Name} в очереди {_name} нет элементов - вызывает Wait");
-                    Monitor.Wait(_lockOn);
-                    if (_indexToPartDict.Count > 0)
+                    if (_indexToPartDict.TryGetValue(index, out part))
                     {
-                        if (_indexToPartDict.TryGetValue(index, out part))
-                        {
-                            _logger.Add(
-                                $"Поток {Thread.CurrentThread.Name} в очереди {_name} дождался unlock - в очереди есть элемент c индексом {index}");
-                            _indexToPartDict.Remove(index);
-                            return part;
-                        }
-                        _logger.Add($"Поток {Thread.CurrentThread.Name} в очереди {_name} дождался unlock - очередь не пустая, но элемента с индексом {index} нет");
-                        return null;
+                        Logger.Add(
+                            $"Поток {Thread.CurrentThread.Name} в очереди {Name} дождался unlock - в очереди есть элемент c индексом {index}");
+                        _indexToPartDict.Remove(index);
+                        return part;
                     }
-                    _logger.Add($"Поток {Thread.CurrentThread.Name} в очереди {_name} дождался unlock - а очередь пустая!");
+                    Logger.Add(
+                        $"Поток {Thread.CurrentThread.Name} в очереди {Name} дождался unlock - очередь не пустая, но элемента с индексом {index} нет");
                     return null;
                 }
-            }
-        }
-
-        public void Unlock()
-        {
-            lock (_lockOn)
-            {
-                Monitor.Pulse(_lockOn);
+                Logger.Add($"Поток {Thread.CurrentThread.Name} в очереди {Name} дождался unlock - а очередь пустая!");
+                return null;
             }
         }
     }

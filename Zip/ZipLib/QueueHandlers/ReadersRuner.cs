@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using ZipLib.Loggers;
 using ZipLib.Queues;
 using ZipLib.Workers;
@@ -39,7 +38,7 @@ namespace ZipLib.QueueHandlers
                     _readersCount++;
                     var readerName = "ReaderN" + _readersCount;
                     var reader = new Reader(readerName, _logger, _sourceFileNameProvider.GetFileName(), part, _nextQueue);
-                    _logger.Add($"Поток {Thread.CurrentThread.Name} отдал part {part.Name} reader`у {readerName}");
+                    _logger.Add($"Поток {Thread.CurrentThread.Name} отдал part {part} reader`у {readerName}");
                     
                     reader.Start();
                 }

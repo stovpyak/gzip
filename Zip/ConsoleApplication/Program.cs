@@ -11,8 +11,8 @@ namespace ConsoleApplication
         static void Main(string[] args)
         {
             // пробуем читать файл несколькими stream
-            var sourceFileName = "data_g1.txt";
-            var targetFileName = "data_g1.gz";
+            var sourceFileName = "Model_837330.xml";
+            var targetFileName = "Model_837330.gz";
 
             //var sourceFileName = "data_mb100.txt";
             //var targetFileName = "data_mb100.gz";

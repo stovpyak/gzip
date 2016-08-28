@@ -18,9 +18,9 @@ namespace ConsoleApplication
             //var sourceFileName = "data_mb100.txt";
             //var targetFileName = "data_mb100.gz";
 
-            //var strategy = new SmartStrategy();
+            var strategy = new SmartStrategy();
             //var strategy = StrategyStub.MakeByPartSize(4, 100 * 1024 * 1024);
-            var strategy = StrategyStub.MakeByPartCount(5, 8);
+            //var strategy = StrategyStub.MakeByPartCount(5, 5);
             var sourceFileNameProfiler = new FileNameProviderStub(sourceFileName);
             var targetFileNameProfiler = new FileNameProviderStub(targetFileName);
 

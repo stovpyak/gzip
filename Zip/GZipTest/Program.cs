@@ -29,7 +29,7 @@ namespace GZipTest
 
                 var strategy = new SmartStrategy();
                 //var strategy = StrategyStub.MakeByPartSize(4, 100 * 1024 * 1024);
-                //var strategy = StrategyStub.MakeByPartCount(5, 15);
+                //var strategy = StrategyStub.MakeByPartCount(4, 25);
                 var appl = new Appl(logger, strategy, _sourceFileNameProvider, _targetFileNameProvider);
                 appl.Execute(param.ApplMode);
 

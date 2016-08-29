@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
+using System.Runtime.Remoting.Messaging;
 using System.Threading;
 using ZipLib.Loggers;
 using ZipLib.QueueHandlers;
@@ -37,13 +39,17 @@ namespace ZipLib
 
         public void Execute(ApplMode mode)
         {
+            if (Thread.CurrentThread.Name == null)
+                Thread.CurrentThread.Name = "Main";
+
             switch (mode)
             {
                 case ApplMode.Compress:
                     Compress();
                     break;
                 case ApplMode.Decompress:
-                    throw new Exception("Режим decompress пока не готов");
+                    Decompress();
+                    break;
                 default:
                     throw new Exception("Неизвеcтное значение ApplMode");
             }
@@ -51,7 +57,6 @@ namespace ZipLib
 
         private void Compress()
         {
-            Thread.CurrentThread.Name = "Main";
             var sourceFileName = _sourceFileNameProvider.GetFileName();
             if (!File.Exists(sourceFileName))
                 throw new FileNotFoundException($"Не найден файл {sourceFileName}");
@@ -95,7 +100,7 @@ namespace ZipLib
             var stopWatch = new Stopwatch();
             stopWatch.Start();
 
-            for (int i = 0; i < maxActivePartCount; i++)
+            for (var i = 0; i < maxActivePartCount; i++)
             {
                 var part = new FilePart($"FilePart{i + 1}");
                 queueEmpty.Add(part);
@@ -109,7 +114,41 @@ namespace ZipLib
             ShowInfo();
             _logger.Add($"Работа завершена. Общее время работы {stopWatch.ElapsedMilliseconds} ms");
         }
-    
+
+        private void Decompress()
+        {
+            // нужно читать из файла части заархивированные
+            // они начинаются с 10 байт (31,139,8,0,0,0,0,0,4,0)
+            // эти части по отдельности отдавать на декомпрессию
+
+            // ! это черновой вариант:
+            // работает только с архивом, состоящим из одной части
+            // все едлеает в одном потоке
+            var sourceFileName = _sourceFileNameProvider.GetFileName();
+
+            if (!File.Exists(sourceFileName))
+                throw new FileNotFoundException($"Не найден файл {sourceFileName}");
+
+            var sourceFileInfo = new FileInfo(sourceFileName);
+            _logger.Add($"Размер файла {sourceFileInfo.Length} byte");
+
+            using (var sourceStream = File.OpenRead(sourceFileName))
+            {
+                using (var gzStream = new GZipStream(sourceStream, CompressionMode.Decompress))
+                {
+                    using (var targetStream = File.Create(_targetFileNameProvider.GetFileName()))
+                    {
+                        byte[] buffer = new byte[sourceFileInfo.Length];
+                        int nRead;
+                        while ((nRead = gzStream.Read(buffer, 0, buffer.Length)) > 0)
+                        {
+                            targetStream.Write(buffer, 0, nRead);
+                        }
+                    }
+                }
+            }
+        }
+
         public void ShowInfo()
         {
             foreach (var queue in _queues)

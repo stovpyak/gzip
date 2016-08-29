@@ -29,14 +29,21 @@ namespace ZipLib.Strategies
             if (lPartSize > int.MaxValue)
                 throw new Exception("размер части > int.MaxValue");
             _partSize = (int)lPartSize;
+            if (_remainderFileLength < _partSize)
+                _partSize = (int)_remainderFileLength;
         }
         
         private void InitPartCount()
         {
-            var count = _remainderFileLength / _partSize;
-            if (_remainderFileLength % _partSize > 0)
-                count++;
-            _partCount = count;
+            if (_partSize == 0)
+                _partCount = 1;
+            else
+            {
+                var count = _remainderFileLength / _partSize;
+                if (_remainderFileLength % _partSize > 0)
+                    count++;
+                _partCount = count;
+            }
         }
 
         public int GetMaxActivePartCount()
@@ -68,7 +75,7 @@ namespace ZipLib.Strategies
 
         public bool InitNextFilePart(FilePart part)
         {
-            if (_remainderFileLength <= 0)
+            if ((_remainderFileLength <= 0) && (_currentPartIndex != 0))
                 return false;
 
             part.Index = _currentPartIndex;

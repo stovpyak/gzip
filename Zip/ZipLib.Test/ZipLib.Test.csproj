@@ -68,7 +68,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="TestArchiver.cs" />
+    <Compile Include="TestCompressDecompress.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestStrategy.cs" />
     <Compile Include="TestStrategyStub\TestByPartCount.cs" />

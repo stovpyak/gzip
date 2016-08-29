@@ -1,14 +1,15 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Threading;
 using ZipLib.Loggers;
-using ZipLib.QueueHandlers;
 using ZipLib.Queues;
 
 namespace ZipLib.Workers
 {
+    /// <summary>
+    /// Архивирует данные
+    /// </summary>
     public class Archiver
     {
         private readonly Thread _thread;
@@ -51,44 +52,12 @@ namespace ZipLib.Workers
         public void Compress()
         {
             var memoryStream = new MemoryStream();
-            using (GZipStream gzip = new GZipStream(memoryStream, CompressionMode.Compress))
+            using (var gzip = new GZipStream(memoryStream, CompressionMode.Compress))
             {
                 gzip.Write(_part.Source, 0 , _part.Source.Length);
             }
             _part.Source = null;
             _part.Result = memoryStream.ToArray();
-        }
-
-        public void Compress(string sourceFileName, string targetFileName)
-        {
-            FileInfo fileToCompress = new FileInfo(sourceFileName);
-
-            using (FileStream originalFileStream = fileToCompress.OpenRead())
-            {
-                using (FileStream compressedFileStream = File.Create(targetFileName))
-                {
-                    using (GZipStream compressionStream = new GZipStream(compressedFileStream,
-                        CompressionMode.Compress))
-                    {
-                        originalFileStream.CopyTo(compressionStream);
-                    }
-                }
-            }
-        }
-
-        public void Decompress(string sourceFileName, string targetFileName)
-        {
-            var fileToDecompress = new FileInfo(sourceFileName);
-            using (FileStream originalFileStream = fileToDecompress.OpenRead())
-            {
-                using (FileStream decompressedFileStream = File.Create(targetFileName))
-                {
-                    using (GZipStream decompressionStream = new GZipStream(originalFileStream, CompressionMode.Decompress))
-                    {
-                        decompressionStream.CopyTo(decompressedFileStream);
-                    }
-                }
-            }
         }
     }
 }

@@ -4,6 +4,9 @@ using ZipLib.Loggers;
 
 namespace GZipTest
 {
+    /// <summary>
+    /// Блок обработывает параметры командной строки и собирает из них струткуру ApplParams
+    /// </summary>
     public class ArgsParser
     {
         private readonly ILogger _logger;

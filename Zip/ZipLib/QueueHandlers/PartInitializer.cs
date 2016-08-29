@@ -5,6 +5,10 @@ using ZipLib.Strategies;
 
 namespace ZipLib.QueueHandlers
 {
+    /// <summary>
+    /// Следит за очередью пустых частей
+    /// Инициализирует их
+    /// </summary>
     public class PartInitializer: QueueHandlerBase
     {
         private readonly ManualResetEventSlim _stopEvent;

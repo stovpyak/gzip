@@ -3,6 +3,9 @@ using System.IO;
 
 namespace ZipLib.Loggers
 {
+    /// <summary>
+    /// Записывает отладочную информацию в файл
+    /// </summary>
     public class FileLogger: ILogger
     {
         private readonly List<string> _items = new List<string>();

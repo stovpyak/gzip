@@ -84,7 +84,6 @@ namespace ZipLib.QueueHandlers
         {
             _stopwatchWait.Reset();
             _stopwatchWait.Start();
-            // при вызове этого метода исполенение должно остановиться, если очередь пустая. и возобновиться, как только в ней появится part
             SourceQueue.ChangeEvent.WaitOne();
             _stopwatchWait.Stop();
             TotalWait = TotalWait + _stopwatchWait.ElapsedMilliseconds;

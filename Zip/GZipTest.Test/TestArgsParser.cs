@@ -45,7 +45,7 @@ namespace GZipTest.Test
             Assert.IsNotNull(param, "параметры должны быть");
             Assert.AreEqual(ApplMode.Compress, param.ApplMode, "ApplMode");
             Assert.AreEqual(source, param.SourceFileName, "SourceFileName");
-            Assert.AreEqual(target, param.TargetFileName, "TargetFilename");
+            Assert.AreEqual(target, param.TargetFileName, "TargetFileName");
         }
 
         [TestMethod]
@@ -60,7 +60,7 @@ namespace GZipTest.Test
             Assert.IsNotNull(param, "параметры должны быть");
             Assert.AreEqual(ApplMode.Decompress, param.ApplMode, "ApplMode");
             Assert.AreEqual(source, param.SourceFileName, "SourceFileName");
-            Assert.AreEqual(target, param.TargetFileName, "TargetFilename");
+            Assert.AreEqual(target, param.TargetFileName, "TargetFileName");
         }
     }
 }

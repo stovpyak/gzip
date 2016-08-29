@@ -3,6 +3,9 @@ using ZipLib.Loggers;
 
 namespace ZipLib.Queues
 {
+    /// <summary>
+    /// Базовый класс для очередей
+    /// </summary>
     public abstract class PartsBase
     {
         protected readonly ILogger Logger;
@@ -32,10 +35,6 @@ namespace ZipLib.Queues
         public void NotifyEndWait()
         {
             ChangeEvent.Set();
-            //lock (LockOn)
-            //{
-            //    Monitor.Pulse(LockOn);
-            //}
         }
     }
 }

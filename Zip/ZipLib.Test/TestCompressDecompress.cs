@@ -27,8 +27,6 @@ namespace ZipLib.Test
 
             // init
             var logger = new LoggerDummy();
-            //var strategy = StrategyStub.MakeByPartCount(1, 1);
-
             var strategy = new SmartStrategy();
             var source = new FileNameProviderStub(sourceFileName);
             var archive = new FileNameProviderStub(compressedFileName);
@@ -46,13 +44,14 @@ namespace ZipLib.Test
             IsFilesEquals(sourceFileName, decompressedNewFileName);
         }
 
+        private const string TestDataFolder = "..\\..\\..\\TestData\\";
 
         [TestMethod]
         public void TestEmptyFile()
         {
-            var sourceFileName = "..\\..\\..\\TestData\\EmptyFile.txt";
-            var compressedFileName = "..\\..\\..\\TestData\\EmptyFile.gz";
-            var decompressedNewFileName = "..\\..\\..\\TestData\\EmptyFileNew.txt";
+            var sourceFileName = TestDataFolder + "EmptyFile.txt";
+            var compressedFileName = TestDataFolder + "EmptyFile.gz";
+            var decompressedNewFileName = TestDataFolder + "EmptyFileNew.txt";
 
             TestCompressDecompressCheck(sourceFileName, compressedFileName, decompressedNewFileName);
         }
@@ -60,12 +59,22 @@ namespace ZipLib.Test
         [TestMethod]
         public void Test1Byte()
         {
-            var sourceFileName = "..\\..\\..\\TestData\\data_1byte.txt";
-            var compressedFileName = "..\\..\\..\\TestData\\data_1byte.gz";
-            var decompressedNewFileName = "..\\..\\..\\TestData\\data_1byte_new.txt";
+            var sourceFileName = TestDataFolder + "data_1byte.txt";
+            var compressedFileName = TestDataFolder + "data_1byte.gz";
+            var decompressedNewFileName = TestDataFolder + "data_1byte_new.txt";
 
             TestCompressDecompressCheck(sourceFileName, compressedFileName, decompressedNewFileName);
          }
+
+        [TestMethod]
+        public void Test10Byte()
+        {
+            var sourceFileName = TestDataFolder + "data_10byte.txt";
+            var compressedFileName = TestDataFolder + "data_10byte.gz";
+            var decompressedNewFileName = TestDataFolder + "data_10byte_new.txt";
+
+            TestCompressDecompressCheck(sourceFileName, compressedFileName, decompressedNewFileName);
+        }
 
         private void IsFilesEquals(string firstFileName, string secondFileName)
         {

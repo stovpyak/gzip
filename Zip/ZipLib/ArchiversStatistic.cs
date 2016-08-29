@@ -3,7 +3,7 @@
 namespace ZipLib
 {
     /// <summary>
-    /// Собираем стстистику работы архиваторов
+    /// Собираем статистику работы архиваторов
     /// </summary>
     public class ArchiversStatistic
     {

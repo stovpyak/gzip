@@ -5,6 +5,10 @@ using ZipLib.Workers;
 
 namespace ZipLib.QueueHandlers
 {
+    /// <summary>
+    /// Следит за очередью частей готовых для архивирования
+    /// Запускает потоки для архивации частей
+    /// </summary>
     public class ArchiversRuner: QueueHandlerBase
     {
         private readonly ArchiversStatistic _statistic = new ArchiversStatistic();

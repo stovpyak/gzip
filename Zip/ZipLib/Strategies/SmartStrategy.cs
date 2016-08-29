@@ -2,6 +2,9 @@
 
 namespace ZipLib.Strategies
 {
+    /// <summary>
+    /// Стратегия - на сколько частей разбить файл и какого они долны быть размера
+    /// </summary>
     public class SmartStrategy: IStrategy
     {
         private int _currentPartIndex;
@@ -65,7 +68,7 @@ namespace ZipLib.Strategies
         private long GetAvailableMemoryForAppl()
         {
             // В 32 - битных программах размер динамически выделяемой памяти ограничен 2 GB, в 64 - битных — 8 TB.
-            // todo: потом нужно учтитывать, что оперативки может быть на машине меньше
+            // todo: потом нужно учтитывать, что оперативной памяти может быть на машине меньше
 
             long oneGb = 1024 * 1024 * 1024;
             var value = oneGb * 1.6;

@@ -12,6 +12,9 @@ using ZipLib.Strategies;
 
 namespace ZipLib
 {
+    /// <summary>
+    /// "Конструирование" приложения из разных частей и запуск его на выполнение
+    /// </summary>
     public class Appl
     {
         private readonly ILogger _logger;
@@ -123,7 +126,7 @@ namespace ZipLib
 
             // ! это черновой вариант:
             // работает только с архивом, состоящим из одной части
-            // все едлеает в одном потоке
+            // все делает в одном потоке
             var sourceFileName = _sourceFileNameProvider.GetFileName();
 
             if (!File.Exists(sourceFileName))

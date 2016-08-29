@@ -24,15 +24,6 @@ namespace ZipLib.Queues
                     Logger.Add($"Поток {Thread.CurrentThread.Name} в очереди {Name}. Есть элементы {_queue.Count} шт. - извлек один элемент сразу");
                     return part;
                 }
-                //Monitor.Pulse(LockOn);
-                //Monitor.Wait(LockOn);
-                //if (_queue.Count > 0)
-                //{
-                //    Logger.Add(
-                //        $"Поток {InnerThread.CurrentThread.Name} в очереди {Name} дождался unlock - в очереди есть элемент");
-                //    return _queue.Dequeue();
-                //}
-                //Logger.Add($"Поток {InnerThread.CurrentThread.Name} в очереди {Name} дождался unlock - а очередь пустая!");
                 return null;
             }
         }
@@ -43,7 +34,6 @@ namespace ZipLib.Queues
             {
                 _queue.Enqueue(part);
                 Logger.Add($"Поток {Thread.CurrentThread.Name} в очереди {Name} поместил в очередь элемент {part}");
-                //Monitor.Pulse(LockOn);
             }
             ChangeEvent.Set();
         }

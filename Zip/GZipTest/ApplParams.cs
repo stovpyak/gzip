@@ -2,6 +2,9 @@
 
 namespace GZipTest
 {
+    /// <summary>
+    /// Параметры для программы
+    /// </summary>
     public class ApplParams
     {
         public ApplMode ApplMode { get; set; }

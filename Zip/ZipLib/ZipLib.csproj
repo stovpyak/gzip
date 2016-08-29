@@ -101,7 +101,6 @@
     <Compile Include="Strategies\IStrategy.cs" />
     <Compile Include="Strategies\SmartStrategy.cs" />
     <Compile Include="Strategies\StrategyStub.cs" />
-    <Compile Include="ThreadStop.cs" />
     <Compile Include="Workers\Archiver.cs" />
   </ItemGroup>
   <ItemGroup />

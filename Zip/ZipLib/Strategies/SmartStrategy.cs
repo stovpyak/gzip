@@ -19,6 +19,9 @@ namespace ZipLib.Strategies
             InitPartCount();
         }
 
+        /// <summary>
+        /// Размер одной части файла
+        /// </summary>
         private void InitPartSize()
         {
             // делим на 2, так как в одной части присутствует прочитанная часть и обработанная
@@ -27,7 +30,7 @@ namespace ZipLib.Strategies
                 throw new Exception("размер части > int.MaxValue");
             _partSize = (int)lPartSize;
         }
-
+        
         private void InitPartCount()
         {
             var count = _remainderFileLength / _partSize;
@@ -38,6 +41,8 @@ namespace ZipLib.Strategies
 
         public int GetMaxActivePartCount()
         {
+            // считаем, что мкасимально кол-во частей одновременно обрабатываемых в системе 
+            //  правильно брать = количеству ядер + 30%
             return Convert.ToInt32(Environment.ProcessorCount * 1.3);
         }
 

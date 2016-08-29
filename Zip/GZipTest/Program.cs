@@ -1,5 +1,6 @@
 ﻿using System;
 using ZipLib;
+using ZipLib.Loggers;
 using ZipLib.Strategies;
 
 namespace GZipTest
@@ -11,9 +12,13 @@ namespace GZipTest
 
         static int Main(string[] args)
         {
+            var logger = new CompositeLogger();
+            var fileLog = new FileLogger();
+            logger.AddChild(fileLog);
+            logger.AddChild(new ConsoleLogger());
+
             try
             {
-                var logger = new ConsoleLogger();
                 var argsParser = new ArgsParser(logger);
                 var param = argsParser.ParsParams(args);
                 if (param == null)
@@ -32,8 +37,12 @@ namespace GZipTest
             }
             catch (Exception e)
             {
-                Console.WriteLine("Возникла ошибка при выполнении программы\n" + e.Message);
+                logger.Add("Возникла ошибка при выполнении программы\r\n" + e.Message);
                 return 1;
+            }
+            finally
+            {
+                fileLog.SaveToFile("GZipTest.log");
             }
         }
     }

@@ -84,8 +84,9 @@
     <Compile Include="FilePart.cs" />
     <Compile Include="IFileNameProvider.cs" />
     <Compile Include="Loggers\ILogger.cs" />
+    <Compile Include="Loggers\CompositeLogger.cs" />
     <Compile Include="Loggers\LoggerDummy.cs" />
-    <Compile Include="Loggers\LoggerStringList.cs" />
+    <Compile Include="Loggers\FileLogger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueueHandlers\ArchiversRuner.cs" />
     <Compile Include="QueueHandlers\IQueueHandler.cs" />

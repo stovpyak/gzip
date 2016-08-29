@@ -21,6 +21,7 @@ namespace ZipLib
         private readonly List<IQueueHandler> _queueHandlers = new List<IQueueHandler>();
 
         private ManualResetEventSlim _stopEvent;
+        private AbortExit _abortExit;
 
         private Writer _writer;
         private ArchiversRuner _archiversRuner;
@@ -82,6 +83,10 @@ namespace ZipLib
                 queueEmpty, queueForReader);
             _queueHandlers.Add(_partInitializer);
 
+
+            // abortExit - отдельный поток следит за нажатием 
+            _abortExit = new AbortExit(_stopEvent);
+
             // вывод отладочной информации
             var sourceFileInfo = new FileInfo(sourceFileName);
             _logger.Add($"Размер файла {sourceFileInfo.Length} byte");
@@ -126,6 +131,9 @@ namespace ZipLib
 
             foreach (var queueHandler in _queueHandlers)
                 queueHandler.Join();
+
+            _abortExit._thread.Abort();
+            _abortExit._thread.Join();
         }
     }
 }

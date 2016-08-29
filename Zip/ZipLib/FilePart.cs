@@ -1,5 +1,8 @@
 ﻿namespace ZipLib
 {
+    /// <summary>
+    /// Часть файла - минимальная единица обрабатываемых данных
+    /// </summary>
     public class FilePart
     {
         public FilePart(string name)
@@ -11,17 +14,12 @@
         /// <summary>
         /// Уникальное имя части. По нему отследиваем "жизненный цикл" частей
         /// </summary>
-        public string Name { get; private set; }
+        public string Name { get; }
 
         /// <summary>
         /// Индекс фасти файла. порядковый номер части при чтении из файла
         /// </summary>
         public int Index { get; set; }
-
-        /// <summary>
-        /// Позиция начиная с которой читается часть из файла
-        /// </summary>
-        public long StartPosition { get; set; }
 
         /// <summary>
         /// Размер части файла

@@ -9,13 +9,11 @@ namespace ZipLib.Strategies
         private int _partSize;
         private long _partCount;
 
-        private long _currentStartPosition;
         private long _remainderFileLength;
 
         public void StartFile(long fileSize)
         {
             _currentPartIndex = 0;
-            _currentStartPosition = 0;
             _remainderFileLength = fileSize;
             InitPartSize();
             InitPartCount();
@@ -23,7 +21,7 @@ namespace ZipLib.Strategies
 
         private void InitPartSize()
         {
-            // делим на 2, так как в одной части присутствует прочитанная часть и заархивированная
+            // делим на 2, так как в одной части присутствует прочитанная часть и обработанная
             var lPartSize = GetAvailableMemoryForAppl() / GetMaxActivePartCount() / 2;
             if (lPartSize > int.MaxValue)
                 throw new Exception("размер части > int.MaxValue");
@@ -55,11 +53,11 @@ namespace ZipLib.Strategies
         private long GetAvailableMemoryForAppl()
         {
             // В 32 - битных программах размер динамически выделяемой памяти ограничен 2 GB, в 64 - битных — 8 TB.
-            // потом нужно учтитывать, что оперативки может быть на машине меньше
+            // todo: потом нужно учтитывать, что оперативки может быть на машине меньше
 
             long oneGb = 1024 * 1024 * 1024;
             var value = oneGb * 1.6;
-            long valueInGb = Convert.ToInt64(value);
+            var valueInGb = Convert.ToInt64(value);
             return valueInGb;
         }
 
@@ -69,13 +67,11 @@ namespace ZipLib.Strategies
                 return false;
 
             part.Index = _currentPartIndex;
-            part.StartPosition = _currentStartPosition;
             if (_remainderFileLength < _partSize)
                 _partSize = (int)_remainderFileLength;
             part.SourceSize = _partSize;
 
             _remainderFileLength = _remainderFileLength - _partSize;
-            _currentStartPosition = _currentStartPosition + _partSize;
 
             _currentPartIndex++;
             return true;

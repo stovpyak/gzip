@@ -4,7 +4,7 @@ using ZipLib.Loggers;
 
 namespace ZipLib.Queues
 {
-    public class IndexedParts: PartsBase
+    public class IndexedParts: PartsBase, IQueue
     {
         private readonly Dictionary<int, FilePart> _indexToPartDict = new Dictionary<int, FilePart>();
 
@@ -20,12 +20,14 @@ namespace ZipLib.Queues
             {
                 _indexToPartDict.Add(part.Index, part);
                 Logger.Add($"Поток {Thread.CurrentThread.Name} в очереди {Name} поместил в очередь элемент {part}");
-                Monitor.Pulse(LockOn);
+                //Monitor.Pulse(LockOn);
             }
+            ChangeEvent.Set();
         }
 
-        public FilePart GetPartByIndex(int index)
+        public FilePart GetPart(object param)
         {
+            var index = (int) param;
             lock (LockOn)
             {
                 FilePart part;
@@ -35,22 +37,22 @@ namespace ZipLib.Queues
                     _indexToPartDict.Remove(index);
                     return part;
                 }
-                Monitor.Pulse(LockOn);
-                Monitor.Wait(LockOn);
-                if (_indexToPartDict.Count > 0)
-                {
-                    if (_indexToPartDict.TryGetValue(index, out part))
-                    {
-                        Logger.Add(
-                            $"Поток {Thread.CurrentThread.Name} в очереди {Name} дождался unlock - в очереди есть элемент c индексом {index}");
-                        _indexToPartDict.Remove(index);
-                        return part;
-                    }
-                    Logger.Add(
-                        $"Поток {Thread.CurrentThread.Name} в очереди {Name} дождался unlock - очередь не пустая, но элемента с индексом {index} нет");
-                    return null;
-                }
-                Logger.Add($"Поток {Thread.CurrentThread.Name} в очереди {Name} дождался unlock - а очередь пустая!");
+                //Monitor.Pulse(LockOn);
+                //Monitor.Wait(LockOn);
+                //if (_indexToPartDict.Count > 0)
+                //{
+                //    if (_indexToPartDict.TryGetValue(index, out part))
+                //    {
+                //        Logger.Add(
+                //            $"Поток {InnerThread.CurrentThread.Name} в очереди {Name} дождался unlock - в очереди есть элемент c индексом {index}");
+                //        _indexToPartDict.Remove(index);
+                //        return part;
+                //    }
+                //    Logger.Add(
+                //        $"Поток {InnerThread.CurrentThread.Name} в очереди {Name} дождался unlock - очередь не пустая, но элемента с индексом {index} нет");
+                //    return null;
+                //}
+                //Logger.Add($"Поток {InnerThread.CurrentThread.Name} в очереди {Name} дождался unlock - а очередь пустая!");
                 return null;
             }
         }

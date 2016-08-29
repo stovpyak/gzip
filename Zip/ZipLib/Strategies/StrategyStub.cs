@@ -9,8 +9,6 @@ namespace ZipLib.Strategies
         private int _partSize = -1;
 
         private long _remainderFileLength;
-        private long _currentStartPosition;
-
         private int _currentPartIndex;
 
         /// <summary>
@@ -49,7 +47,6 @@ namespace ZipLib.Strategies
         public void StartFile(long fileSize)
         {
             _currentPartIndex = 0;
-            _currentStartPosition = 0;
             _remainderFileLength = fileSize;
 
             // вычисляем _partSize или _partCount в зависимости от того что задано
@@ -97,14 +94,12 @@ namespace ZipLib.Strategies
                 return false;
 
             part.Index = _currentPartIndex;
-            part.StartPosition = _currentStartPosition;
             if (_remainderFileLength < _partSize)
                 _partSize = (int)_remainderFileLength;
             part.SourceSize = _partSize;
 
             _remainderFileLength = _remainderFileLength - _partSize;
-            _currentStartPosition = _currentStartPosition + _partSize;
-
+   
             _currentPartIndex++;
             return true;
         }

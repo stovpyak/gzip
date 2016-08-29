@@ -5,65 +5,42 @@ using ZipLib.Strategies;
 
 namespace ZipLib.QueueHandlers
 {
-    public class PartInitializer
+    public class PartInitializer: QueueHandlerBase
     {
-        private readonly ThreadStop _threadStop;
-        private readonly ILogger _logger;
         private readonly ManualResetEventSlim _stopEvent;
-
         private readonly IStrategy _strategy;
-        private readonly IQueue _sourceQueue;
-        private readonly IQueue _nextQueue;
 
-        public PartInitializer(ThreadStop threadStop, ILogger logger, ManualResetEventSlim stopEvent, IStrategy strategy, IQueue sourceQueue, IQueue nextQueue)
+        public PartInitializer(ILogger logger, ManualResetEventSlim stopEvent, IStrategy strategy, IQueue sourceQueue, IQueue nextQueue)
+            :base(logger, sourceQueue, nextQueue)
         {
-            _threadStop = threadStop;
-            _logger = logger;
             _stopEvent = stopEvent;
-
             _strategy = strategy;
-            _sourceQueue = sourceQueue;
-            _nextQueue = nextQueue;
-
-            var thread = new Thread(this.Run) { Name = "PartInitializer" };
-            thread.Start();
+  
+            InnerThread = new Thread(this.Run) { Name = "PartInitializer" };
+            InnerThread.Start();
         }
 
-        private int _partCount;
         private int _removedPartCount;
 
-        private void Run()
+        protected override bool ProcessPart(FilePart part)
         {
-            while (!_threadStop.IsNeedStop)
+            Logger.Add($"Поток {Thread.CurrentThread.Name} получил из очереди {SourceQueue.Name} part {part}");
+            if (_strategy.InitNextFilePart(part))
             {
-                _logger.Add($"Поток {Thread.CurrentThread.Name} запросил элемент из очереди {_sourceQueue.Name}");
-                // при вызове этого метода исполенение должно остановиться, если очередь пустая. и возобновиться, как только в ней появится part
-                var part = _sourceQueue.GetPart();
-                if (part != null)
-                {
-                    _logger.Add(
-                        $"Поток {Thread.CurrentThread.Name} получил из очереди {_sourceQueue.Name} part {part}");
-                    if (_strategy.InitNextFilePart(part))
-                    {
-                        _logger.Add($"Поток {Thread.CurrentThread.Name} проинициализировал part {part}");
-                        _nextQueue.Add(part);
-                        _partCount++;
-                    }
-                    else
-                    {
-                        _logger.Add($"!Поток {Thread.CurrentThread.Name} НЕ проинициализировал part {part} - исходный файл прочитан");
-                        _removedPartCount++;
-                        if (_removedPartCount == _strategy.GetMaxActivePartCount())
-                        {
-                            _logger.Add(
-                                $"!Поток {Thread.CurrentThread.Name} Выведены все обрабатываемые части {_removedPartCount} шт. - это признак того, что работа завершена");
-                            _stopEvent.Set();
-                        }
-                    }
-                }
+                Logger.Add($"Поток {Thread.CurrentThread.Name} проинициализировал part {part}");
+                NextQueue?.Add(part);
+                return true;
             }
-            _logger.Add($"Поток {Thread.CurrentThread.Name} завершил свой run");
-            _logger.Add($"Поток {Thread.CurrentThread.Name} обработано частей {_partCount}");
+            Logger.Add(
+                $"!Поток {Thread.CurrentThread.Name} НЕ проинициализировал part {part} - исходный файл прочитан");
+            _removedPartCount++;
+            if (_removedPartCount == _strategy.GetMaxActivePartCount())
+            {
+                Logger.Add(
+                    $"!Поток {Thread.CurrentThread.Name} выведены все обрабатываемые части {_removedPartCount} шт. - это признак того, что работа завершена");
+                _stopEvent.Set();
+            }
+            return false;
         }
     }
 }

@@ -12,12 +12,12 @@ namespace ZipLib.Workers
     {
         private readonly Thread _thread;
         private readonly ILogger _logger;
-        private ArchiversStatistic _statistic;
+        private readonly ArchiversStatistic _statistic;
 
         private readonly FilePart _part;
-        private readonly IndexedParts _nextQueue;
+        private readonly IQueue _nextQueue;
 
-        public Archiver(string name, ILogger logger, ArchiversStatistic statistic, FilePart part, IndexedParts nextQueue)
+        public Archiver(string name, ILogger logger, ArchiversStatistic statistic, FilePart part, IQueue nextQueue)
         {
             _logger = logger;
             _part = part;

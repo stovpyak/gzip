@@ -18,6 +18,8 @@ namespace ZipLib.Queues
 
         public abstract int Count { get; }
 
+        public AutoResetEvent ChangeEvent { get; } = new AutoResetEvent(false);
+
         /// <summary>
         /// Добавлене элемента в очередь
         /// </summary>
@@ -29,10 +31,11 @@ namespace ZipLib.Queues
         /// </summary>
         public void NotifyEndWait()
         {
-            lock (LockOn)
-            {
-                Monitor.Pulse(LockOn);
-            }
+            ChangeEvent.Set();
+            //lock (LockOn)
+            //{
+            //    Monitor.Pulse(LockOn);
+            //}
         }
     }
 }

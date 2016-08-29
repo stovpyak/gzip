@@ -16,7 +16,6 @@ namespace ZipLib.Test
             var part = new FilePart("dummyPartName");
             var resInit = strategy.InitNextFilePart(part);
             Assert.IsTrue(resInit, "не удалось проиницализировать часть");
-            Assert.AreEqual(0, part.StartPosition, "start position");
             Assert.AreEqual(100, part.SourceSize, "size");
         }
     }

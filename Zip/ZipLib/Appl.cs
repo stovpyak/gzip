@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
 using System.Runtime.Remoting.Messaging;
 using System.Threading;
+using ZipLib.Decompress;
 using ZipLib.Loggers;
 using ZipLib.QueueHandlers;
 using ZipLib.Queues;
@@ -98,6 +100,7 @@ namespace ZipLib
             var maxActivePartCount = _strategy.GetMaxActivePartCount();
             _logger.Add($"Максимальное кол-во одновременно обрабатываемых частей {maxActivePartCount} шт.");
             _logger.Add($"Всего частей {_strategy.GetPartCount()} шт.");
+            _logger.Add($"Размер одной части {_strategy.GetPatrSize()} byte");
             _logger.Add("Работа начата...");
 
             var stopWatch = new Stopwatch();
@@ -118,6 +121,8 @@ namespace ZipLib
             _logger.Add($"Работа завершена. Общее время работы {stopWatch.ElapsedMilliseconds} ms");
         }
 
+        private const int SizeOneReadingPart = 1000;
+
         private void Decompress()
         {
             // нужно читать из файла части заархивированные
@@ -135,22 +140,24 @@ namespace ZipLib
             var sourceFileInfo = new FileInfo(sourceFileName);
             _logger.Add($"Размер файла {sourceFileInfo.Length} byte");
 
-            using (var sourceStream = File.OpenRead(sourceFileName))
-            {
-                using (var gzStream = new GZipStream(sourceStream, CompressionMode.Decompress))
-                {
-                    using (var targetStream = File.Create(_targetFileNameProvider.GetFileName()))
-                    {
-                        byte[] buffer = new byte[sourceFileInfo.Length];
-                        int nRead;
-                        while ((nRead = gzStream.Read(buffer, 0, buffer.Length)) > 0)
-                        {
-                            targetStream.Write(buffer, 0, nRead);
-                        }
-                    }
-                }
-            }
+            //using (var sourceStream = File.OpenRead(sourceFileName))
+            //{
+            //    using (var gzStream = new GZipStream(sourceStream, CompressionMode.Decompress))
+            //    {
+            //        using (var targetStream = File.Create(_targetFileNameProvider.GetFileName()))
+            //        {
+            //            byte[] buffer = new byte[sourceFileInfo.Length];
+            //            int nRead;
+            //            while ((nRead = gzStream.Read(buffer, 0, buffer.Length)) > 0)
+            //            {
+            //                targetStream.Write(buffer, 0, nRead);
+            //            }
+            //        }
+            //    }
+            //}
         }
+
+       
 
         public void ShowInfo()
         {

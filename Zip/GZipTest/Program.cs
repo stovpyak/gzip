@@ -5,6 +5,10 @@ using ZipLib.Strategies;
 
 namespace GZipTest
 {
+    // todo
+    // - тесты для TitleSearcher в которых будет несколько заголовков
+    //
+
     class Program
     {
         private static IFileNameProvider _sourceFileNameProvider;
@@ -29,7 +33,7 @@ namespace GZipTest
 
                 var strategy = new SmartStrategy();
                 //var strategy = StrategyStub.MakeByPartSize(4, 100 * 1024 * 1024);
-                //var strategy = StrategyStub.MakeByPartCount(4, 25);
+                //var strategy = StrategyStub.MakeByPartCount(5, 130);
                 var appl = new Appl(logger, strategy, _sourceFileNameProvider, _targetFileNameProvider);
                 appl.Execute(param.ApplMode);
 

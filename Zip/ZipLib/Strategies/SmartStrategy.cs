@@ -61,6 +61,11 @@ namespace ZipLib.Strategies
             return _partCount;
         }
 
+        public int GetPatrSize()
+        {
+            return _partSize;
+        }
+
         /// <summary>
         /// Возвращает доступный объем памяти для приложения
         /// </summary>

@@ -80,6 +80,9 @@
     <Compile Include="Appl.cs" />
     <Compile Include="ApplMode.cs" />
     <Compile Include="ArchiversStatistic.cs" />
+    <Compile Include="Decompress\ArhivePortion.cs" />
+    <Compile Include="Decompress\TitleSearcher.cs" />
+    <Compile Include="Decompress\TitleSearchResult.cs" />
     <Compile Include="FileNameProviderStub.cs" />
     <Compile Include="FilePart.cs" />
     <Compile Include="IFileNameProvider.cs" />
@@ -88,6 +91,7 @@
     <Compile Include="Loggers\LoggerDummy.cs" />
     <Compile Include="Loggers\FileLogger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QueueHandlers\ArchiveReader.cs" />
     <Compile Include="QueueHandlers\ArchiversRuner.cs" />
     <Compile Include="QueueHandlers\IQueueHandler.cs" />
     <Compile Include="QueueHandlers\PartInitializer.cs" />

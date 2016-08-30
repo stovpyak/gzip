@@ -88,6 +88,11 @@ namespace ZipLib.Strategies
             return _partCount;
         }
 
+        public int GetPatrSize()
+        {
+            return _partSize;
+        }
+
         public bool InitNextFilePart(FilePart part)
         {
             if (_remainderFileLength <= 0)

@@ -73,6 +73,10 @@
     <Compile Include="TestStrategy.cs" />
     <Compile Include="TestStrategyStub\TestByPartCount.cs" />
     <Compile Include="TestStrategyStub\TestByPartSize.cs" />
+    <Compile Include="TestTitleSearcher\ExistsTitle.cs" />
+    <Compile Include="TestTitleSearcher\PartTitle.cs" />
+    <Compile Include="TestTitleSearcher\TestNotTitle.cs" />
+    <Compile Include="TestTitleSearcher\TestTitleSercherBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ZipLib\ZipLib.csproj">

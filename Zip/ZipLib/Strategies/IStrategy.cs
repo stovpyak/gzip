@@ -6,6 +6,7 @@
 
         int GetMaxActivePartCount();
         long GetPartCount();
+        int GetPatrSize();
 
         bool InitNextFilePart(FilePart part);
     }

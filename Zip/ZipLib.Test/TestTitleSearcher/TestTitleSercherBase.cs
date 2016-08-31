@@ -6,7 +6,7 @@ namespace ZipLib.Test.TestTitleSearcher
 {
     public abstract class TestTitleSercherBase
     {
-        protected void CheckSearchResult(List<TitleSearchResult> res, TitleMode mode, int index)
+        protected void CheckSearchResult(List<TitleInfo> res, TitleMode mode, int index)
         {
             Assert.AreEqual(1, res.Count, "res.Count");
             Assert.AreEqual(mode, res[0].Mode, "Mode");

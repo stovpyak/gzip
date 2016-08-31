@@ -11,42 +11,42 @@ namespace ZipLib.Test.TestTitleSearcher
         public void TestEmptyInput()
         {
             byte[] input = {};
-            Assert.IsNull(TitleSearcher.GetIndexTitle(input));
+            Assert.IsNull(TitleSearcher.GetTitlesInfo(input));
         }
 
         [TestMethod]
         public void TestOneByte()
         {
             byte[] input = { 1 };
-            Assert.IsNull(TitleSearcher.GetIndexTitle(input));
+            Assert.IsNull(TitleSearcher.GetTitlesInfo(input));
         }
 
         [TestMethod]
         public void TestTwoBytes()
         {
             byte[] input = { 1, 3 };
-            Assert.IsNull(TitleSearcher.GetIndexTitle(input));
+            Assert.IsNull(TitleSearcher.GetTitlesInfo(input));
         }
 
         [TestMethod]
         public void TestBegin1Title()
         {
             byte[] input = { 31, 1 };
-            Assert.IsNull(TitleSearcher.GetIndexTitle(input));
+            Assert.IsNull(TitleSearcher.GetTitlesInfo(input));
         }
 
         [TestMethod]
         public void TestBegin2Title()
         {
             byte[] input = { 31, 139, 1 };
-            Assert.IsNull(TitleSearcher.GetIndexTitle(input));
+            Assert.IsNull(TitleSearcher.GetTitlesInfo(input));
         }
 
         [TestMethod]
         public void TestBegin9Title()
         {
             byte[] input = { 31, 139, 8, 0, 0, 0, 0, 0, 4, 1 };
-            Assert.IsNull(TitleSearcher.GetIndexTitle(input));
+            Assert.IsNull(TitleSearcher.GetTitlesInfo(input));
         }
     }
 }

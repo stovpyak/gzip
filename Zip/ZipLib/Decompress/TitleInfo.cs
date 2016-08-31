@@ -3,11 +3,11 @@
     /// <summary>
     /// Результат поиска заголовка
     /// </summary>
-    public class TitleSearchResult
+    public class TitleInfo
     {
-        public static TitleSearchResult MakeByIndexTitle(int value)
+        public static TitleInfo MakeByIndexTitle(int value)
         {
-            var instance = new TitleSearchResult
+            var instance = new TitleInfo
             {
                 IndexStartTitle = value,
                 Mode = TitleMode.AllTitle
@@ -15,9 +15,9 @@
             return instance;
         }
 
-        public static TitleSearchResult MakeByIndexPartTitle(int value)
+        public static TitleInfo MakeByIndexPartTitle(int value)
         {
-            var instance = new TitleSearchResult
+            var instance = new TitleInfo
             {
                 IndexStartTitle = value,
                 Mode = TitleMode.PartTitle
@@ -25,12 +25,12 @@
             return instance;
         }
 
-        public static TitleSearchResult MakeNotFount()
+        public static TitleInfo MakeNotFount()
         {
-            return new TitleSearchResult();
+            return new TitleInfo();
         }
 
-        private TitleSearchResult()
+        private TitleInfo()
         {
             IndexStartTitle = -1;
         }

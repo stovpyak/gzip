@@ -68,6 +68,10 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="TestArhivePartReader.cs" />
+    <Compile Include="TestArhivePortion\TestExtractFirstTitleAndData.cs" />
+    <Compile Include="TestArhivePortion\TestMake.cs" />
+    <Compile Include="TestBytesBuffer.cs" />
     <Compile Include="TestCompressDecompress.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TestStrategy.cs" />

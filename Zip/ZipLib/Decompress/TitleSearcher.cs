@@ -17,32 +17,32 @@ namespace ZipLib.Decompress
         /// <summary>
         /// Ищет заголовки в прочитанной части
         /// </summary>
-        /// <param name="portion"></param>
+        /// <param name="buffer"></param>
         /// <returns>Возвращает null, если заголовков совсем нет. 
         /// Если есть, то возвращает список результатов поиска, где один элемент - это инфо по одному заголовку</returns>
-        public static List<TitleSearchResult> GetIndexTitle(byte[] portion)
+        public static List<TitleInfo> GetTitlesInfo(byte[] buffer)
         {
-            List<TitleSearchResult> result = null;
+            List<TitleInfo> result = null;
 
             var count = 0;
-            for (var i = 0; i < portion.Length; i++)
+            for (var i = 0; i < buffer.Length; i++)
             {
-                if (portion[i] == Title[count])
+                if (buffer[i] == Title[count])
                 {
                     count++;
                     if (count == 10)
                     {
                         // нашли title полностью - добавляем его в результат
                         if (result == null)
-                            result = new List<TitleSearchResult>();
-                        result.Add(TitleSearchResult.MakeByIndexTitle(i - Title.Length + 1));
+                            result = new List<TitleInfo>();
+                        result.Add(TitleInfo.MakeByIndexTitle(i - Title.Length + 1));
                         count = 0;
                     }
                 }
                 else
                 {
                     count = 0;
-                    if (portion[i] == Title[count])
+                    if (buffer[i] == Title[count])
                         count++;
                 }
             }
@@ -52,8 +52,8 @@ namespace ZipLib.Decompress
 
             // нашли часть заголовка в конце
             if (result == null)
-                result = new List<TitleSearchResult>();
-            result.Add(TitleSearchResult.MakeByIndexPartTitle(portion.Length - count));
+                result = new List<TitleInfo>();
+            result.Add(TitleInfo.MakeByIndexPartTitle(buffer.Length - count));
             return result;
         }
     }

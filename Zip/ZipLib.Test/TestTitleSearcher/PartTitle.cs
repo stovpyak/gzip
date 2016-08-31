@@ -10,21 +10,21 @@ namespace ZipLib.Test.TestTitleSearcher
         public void FirstOfTitle()
         {
             byte[] input = { 1, 31 };
-            CheckSearchResult(TitleSearcher.GetIndexTitle(input), TitleMode.PartTitle, 1);
+            CheckSearchResult(TitleSearcher.GetTitlesInfo(input), TitleMode.PartTitle, 1);
         }
 
         [TestMethod]
         public void TwoByteOfTitle()
         {
             byte[] input = { 1, 2, 31, 139, 31, 139 };
-            CheckSearchResult(TitleSearcher.GetIndexTitle(input), TitleMode.PartTitle, 4);
+            CheckSearchResult(TitleSearcher.GetTitlesInfo(input), TitleMode.PartTitle, 4);
         }
 
         [TestMethod]
         public void OnlyPartTitle()
         {
             byte[] input = { 31, 139, 8, 0 };
-            CheckSearchResult(TitleSearcher.GetIndexTitle(input), TitleMode.PartTitle, 0);
+            CheckSearchResult(TitleSearcher.GetTitlesInfo(input), TitleMode.PartTitle, 0);
         }
 
     }

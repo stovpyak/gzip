@@ -11,7 +11,7 @@ namespace ZipLib.QueueHandlers
     /// </summary>
     public class ArchiversRuner: QueueHandlerBase
     {
-        private readonly ArchiversStatistic _statistic = new ArchiversStatistic();
+        private readonly ProcessStatistic _statistic = new ProcessStatistic();
 
         public ArchiversRuner(ILogger logger, IQueue sourceQueue, IQueue nextQueue)
             :base(logger, sourceQueue, nextQueue)

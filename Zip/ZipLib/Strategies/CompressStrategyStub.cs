@@ -2,7 +2,7 @@
 
 namespace ZipLib.Strategies
 {
-    public class StrategyStub : IStrategy
+    public class CompressStrategyStub : ICompressStrategy
     {
         private readonly int _maxActivePartCount;
         private long _partCount = -1;
@@ -15,21 +15,21 @@ namespace ZipLib.Strategies
         /// 
         /// </summary>
         /// <param name="maxActivePartCount">Максимальное кол-во частей, которые могут обрабатываться в системе одновременно</param>
-        private StrategyStub(int maxActivePartCount)
+        private CompressStrategyStub(int maxActivePartCount)
         {
             _maxActivePartCount = maxActivePartCount;
         }
 
-        public static IStrategy MakeByPartCount(int maxActivePartCount, int partCount)
+        public static ICompressStrategy MakeByPartCount(int maxActivePartCount, int partCount)
         {
-            var newInstance = new StrategyStub(maxActivePartCount);
+            var newInstance = new CompressStrategyStub(maxActivePartCount);
             newInstance.SetPartCount(partCount);
             return newInstance;
         }
 
-        public static IStrategy MakeByPartSize(int maxActivePartCount, int partSize)
+        public static ICompressStrategy MakeByPartSize(int maxActivePartCount, int partSize)
         {
-            var newInstance = new StrategyStub(maxActivePartCount);
+            var newInstance = new CompressStrategyStub(maxActivePartCount);
             newInstance.SetPartSize(partSize);
             return newInstance;
         }

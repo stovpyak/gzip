@@ -59,6 +59,26 @@ namespace ZipLib.Decompress
             return bytesBuffer;
         }
 
+        public void Append(BytesBuffer bytesBuffer)
+        {
+            var newBuffer = new byte[_bytesBuffer.Size + bytesBuffer.Size];
+            // переливаем из двух масивов в один
+            // todo не уверен, что это самый эфективный способЫ
+            for (int i = _bytesBuffer.StartPosition, index = 0; i <= _bytesBuffer.EndPosition; i++, index++)
+            {
+                newBuffer[index] = _bytesBuffer.InnerBuffer[i];
+            }
+            for (int i = bytesBuffer.StartPosition, index = 0; i <= bytesBuffer.EndPosition; i++, index++)
+            {
+                newBuffer[_bytesBuffer.Size + index] = bytesBuffer.InnerBuffer[i];
+            }
+            // пересоздаем внутрений буфер
+            _bytesBuffer = new BytesBuffer(newBuffer, 0, newBuffer.Length - 1);
+            // заново ищем заголовки
+            _titlesInfo = TitleSearcher.GetTitlesInfo(_bytesBuffer.InnerBuffer);
+        }
+
+
         public bool IsExistsTitle => (_titlesInfo != null) && (_titlesInfo.Count > 0);
 
         public bool IsExistsAllTitle

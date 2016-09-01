@@ -22,6 +22,11 @@
         public int Index { get; set; }
 
         /// <summary>
+        /// Признак того, что часть последняя
+        /// </summary>
+        public bool IsLast { get; set; }
+
+        /// <summary>
         /// Размер части файла
         /// </summary>
         public int SourceSize { get; set; }

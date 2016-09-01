@@ -1,11 +1,9 @@
 ﻿using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Security.Cryptography;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ZipLib.Loggers;
 using ZipLib.Strategies;
-using ZipLib.Workers;
 
 namespace ZipLib.Test
 {
@@ -27,18 +25,17 @@ namespace ZipLib.Test
 
             // init
             var logger = new LoggerDummy();
-            var strategy = new SmartStrategy();
+            var appl = new Appl(logger);
+
             var source = new FileNameProviderStub(sourceFileName);
             var archive = new FileNameProviderStub(compressedFileName);
-
-            var applForCompress = new Appl(logger, strategy, source, archive);
-            applForCompress.Execute(ApplMode.Compress);
+            var strategy = new SmartCompressStrategy();
+            appl.ExecuteCompress(strategy, source, archive);
             Assert.IsTrue(File.Exists(compressedFileName), "Файл архива не обнаружен после архивации");
 
             var decompress = new FileNameProviderStub(decompressedNewFileName);
-
-            var applForDecompress = new Appl(logger, strategy, archive, decompress);
-            applForDecompress.Execute(ApplMode.Decompress);
+            var decompressStrategy = new DecompressStrategyStub(1);
+            appl.ExecuteDecompress(decompressStrategy, archive, decompress);
             Assert.IsTrue(File.Exists(compressedFileName), "Файл разархивированный не обнаружен после разархивации");
 
             IsFilesEquals(sourceFileName, decompressedNewFileName);

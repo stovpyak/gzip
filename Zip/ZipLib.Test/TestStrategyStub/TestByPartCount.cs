@@ -9,7 +9,7 @@ namespace ZipLib.Test.TestStrategyStub
         [TestMethod]
         public void TestOnePart()
         {
-            var strategy = StrategyStub.MakeByPartCount(1, 1);
+            var strategy = CompressStrategyStub.MakeByPartCount(1, 1);
             strategy.StartFile(100);
             Assert.AreEqual(1, strategy.GetPartCount(), "part count");
 
@@ -22,7 +22,7 @@ namespace ZipLib.Test.TestStrategyStub
         [TestMethod]
         public void TestTwoParts()
         {
-            var strategy = StrategyStub.MakeByPartCount(1, 2);
+            var strategy = CompressStrategyStub.MakeByPartCount(1, 2);
             strategy.StartFile(100);
             Assert.AreEqual(2, strategy.GetPartCount(), "part count");
 
@@ -40,7 +40,7 @@ namespace ZipLib.Test.TestStrategyStub
         [TestMethod]
         public void TestThreeParts()
         {
-            var strategy = StrategyStub.MakeByPartCount(1, 3);
+            var strategy = CompressStrategyStub.MakeByPartCount(1, 3);
             strategy.StartFile(100);
             Assert.AreEqual(3, strategy.GetPartCount(), "part count");
 

@@ -14,12 +14,12 @@ namespace ZipLib.Workers
     {
         private readonly Thread _thread;
         private readonly ILogger _logger;
-        private readonly ArchiversStatistic _statistic;
+        private readonly ProcessStatistic _statistic;
 
         private readonly FilePart _part;
         private readonly IQueue _nextQueue;
 
-        public Archiver(string name, ILogger logger, ArchiversStatistic statistic, FilePart part, IQueue nextQueue)
+        public Archiver(string name, ILogger logger, ProcessStatistic statistic, FilePart part, IQueue nextQueue)
         {
             _logger = logger;
             _part = part;
@@ -51,13 +51,15 @@ namespace ZipLib.Workers
 
         public void Compress()
         {
-            var memoryStream = new MemoryStream();
-            using (var gzip = new GZipStream(memoryStream, CompressionMode.Compress))
+            using (var memoryStream = new MemoryStream())
             {
-                gzip.Write(_part.Source, 0 , _part.Source.Length);
+                using (var gzip = new GZipStream(memoryStream, CompressionMode.Compress))
+                {
+                    gzip.Write(_part.Source, 0, _part.Source.Length);
+                }
+                _part.Source = null;
+                _part.Result = memoryStream.ToArray(); // todo возможно можно и не преобразовывать в массив
             }
-            _part.Source = null;
-            _part.Result = memoryStream.ToArray();
         }
     }
 }

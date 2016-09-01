@@ -3,5 +3,7 @@
     public interface ILogger
     {
         void Add(string msg);
+
+        void Close();
     }
 }

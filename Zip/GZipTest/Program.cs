@@ -6,7 +6,7 @@ using ZipLib.Strategies;
 namespace GZipTest
 {
     // todo
-    // - тесты для TitleSearcher в которых будет несколько заголовков
+    // 
     //
 
     class Program
@@ -17,7 +17,7 @@ namespace GZipTest
         static int Main(string[] args)
         {
             var logger = new CompositeLogger();
-            var fileLog = new FileLogger();
+            var fileLog = new FileLogger("GZipTest.log");
             logger.AddChild(fileLog);
             logger.AddChild(new ConsoleLogger());
 
@@ -30,13 +30,21 @@ namespace GZipTest
 
                 _sourceFileNameProvider = new FileNameProviderStub(param.SourceFileName);
                 _targetFileNameProvider = new FileNameProviderStub(param.TargetFileName);
-
-                var strategy = new SmartStrategy();
-                //var strategy = StrategyStub.MakeByPartSize(4, 100 * 1024 * 1024);
-                //var strategy = StrategyStub.MakeByPartCount(5, 130);
-                var appl = new Appl(logger, strategy, _sourceFileNameProvider, _targetFileNameProvider);
-                appl.Execute(param.ApplMode);
-
+                
+                var appl = new Appl(logger);
+                switch (param.ApplMode)
+                {
+                    case ApplMode.Compress:
+                        var compressStrategy = new SmartCompressStrategy();
+                        //var compressStrategy = CompressStrategyStub.MakeByPartSize(4, 100 * 1024 * 1024);
+                        //var compressStrategy = CompressStrategyStub.MakeByPartCount(5, 130);
+                        appl.ExecuteCompress(compressStrategy, _sourceFileNameProvider, _targetFileNameProvider);
+                        break;
+                    case  ApplMode.Decompress:
+                        var decompressStrategy = new DecompressStrategyStub(1);
+                        appl.ExecuteDecompress(decompressStrategy, _sourceFileNameProvider, _targetFileNameProvider);
+                        break;
+                }
                 return 0;
             }
             catch (Exception e)
@@ -46,7 +54,7 @@ namespace GZipTest
             }
             finally
             {
-                fileLog.SaveToFile("GZipTest.log");
+                logger.Close();
             }
         }
     }

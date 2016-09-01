@@ -79,7 +79,7 @@
   <ItemGroup>
     <Compile Include="Appl.cs" />
     <Compile Include="ApplMode.cs" />
-    <Compile Include="ArchiversStatistic.cs" />
+    <Compile Include="ProcessStatistic.cs" />
     <Compile Include="Decompress\ArchivePart.cs" />
     <Compile Include="Decompress\ArhivePartReader.cs" />
     <Compile Include="Decompress\ArhivePortion.cs" />
@@ -96,6 +96,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueueHandlers\ArchiveReader.cs" />
     <Compile Include="QueueHandlers\ArchiversRuner.cs" />
+    <Compile Include="QueueHandlers\DecompressRuner.cs" />
     <Compile Include="QueueHandlers\IQueueHandler.cs" />
     <Compile Include="QueueHandlers\PartInitializer.cs" />
     <Compile Include="QueueHandlers\QueueHandlerBase.cs" />
@@ -105,10 +106,13 @@
     <Compile Include="Queues\PartQueue.cs" />
     <Compile Include="Queues\IndexedParts.cs" />
     <Compile Include="Queues\PartsBase.cs" />
-    <Compile Include="Strategies\IStrategy.cs" />
-    <Compile Include="Strategies\SmartStrategy.cs" />
-    <Compile Include="Strategies\StrategyStub.cs" />
+    <Compile Include="Strategies\DecompressStrategyStub.cs" />
+    <Compile Include="Strategies\IDecompressStrategy.cs" />
+    <Compile Include="Strategies\ICompressStrategy.cs" />
+    <Compile Include="Strategies\SmartCompressStrategy.cs" />
+    <Compile Include="Strategies\CompressStrategyStub.cs" />
     <Compile Include="Workers\Archiver.cs" />
+    <Compile Include="Workers\Decompressor.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

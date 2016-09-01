@@ -11,13 +11,11 @@ namespace ZipLib.QueueHandlers
     /// </summary>
     public class PartInitializer: QueueHandlerBase
     {
-        private readonly ManualResetEventSlim _stopEvent;
-        private readonly IStrategy _strategy;
+        private readonly ICompressStrategy _strategy;
 
-        public PartInitializer(ILogger logger, ManualResetEventSlim stopEvent, IStrategy strategy, IQueue sourceQueue, IQueue nextQueue)
+        public PartInitializer(ILogger logger, ICompressStrategy strategy, IQueue sourceQueue, IQueue nextQueue)
             :base(logger, sourceQueue, nextQueue)
         {
-            _stopEvent = stopEvent;
             _strategy = strategy;
   
             InnerThread = new Thread(this.Run) { Name = "PartInitializer" };
@@ -42,7 +40,6 @@ namespace ZipLib.QueueHandlers
             {
                 Logger.Add(
                     $"!Поток {Thread.CurrentThread.Name} выведены все обрабатываемые части {_removedPartCount} шт. - это признак того, что работа завершена");
-                _stopEvent.Set();
             }
             return false;
         }

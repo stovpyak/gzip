@@ -6,5 +6,10 @@
         {
             // empty, так как dummy
         }
+
+        public void Close()
+        {
+            // empty, так как dummy
+        }
     }
 }

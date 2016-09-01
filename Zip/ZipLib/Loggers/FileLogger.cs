@@ -9,6 +9,12 @@ namespace ZipLib.Loggers
     public class FileLogger: ILogger
     {
         private readonly List<string> _items = new List<string>();
+        private readonly string _fileName;
+
+        public FileLogger(string fileName)
+        {
+            _fileName = fileName;
+        }
 
         public void Add(string msg)
         {
@@ -18,7 +24,12 @@ namespace ZipLib.Loggers
             }
         }
 
-        public void SaveToFile(string fileName)
+        public void Close()
+        {
+            SaveToFile(_fileName);
+        }
+
+        private void SaveToFile(string fileName)
         {
             lock (_items)
             {

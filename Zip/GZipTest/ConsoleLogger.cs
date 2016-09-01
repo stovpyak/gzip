@@ -17,5 +17,10 @@ namespace GZipTest
                 Console.WriteLine(msg);
             }
         }
+
+        public void Close()
+        {
+            // empty
+        }
     }
 }

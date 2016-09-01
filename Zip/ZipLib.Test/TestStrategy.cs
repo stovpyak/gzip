@@ -10,7 +10,7 @@ namespace ZipLib.Test
         [TestMethod]
         public void TestEmptyFile()
         {
-            var strategy = new SmartStrategy();
+            var strategy = new SmartCompressStrategy();
             strategy.StartFile(0);
             Assert.AreEqual(1, strategy.GetPartCount(), "part count");
 
@@ -23,7 +23,7 @@ namespace ZipLib.Test
         [TestMethod]
         public void TestOnePart()
         {
-            var strategy = new SmartStrategy();
+            var strategy = new SmartCompressStrategy();
             strategy.StartFile(100);
             Assert.AreEqual(1, strategy.GetPartCount(), "part count");
 

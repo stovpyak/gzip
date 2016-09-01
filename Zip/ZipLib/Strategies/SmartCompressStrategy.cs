@@ -5,7 +5,7 @@ namespace ZipLib.Strategies
     /// <summary>
     /// Стратегия - на сколько частей разбить файл и какого они долны быть размера
     /// </summary>
-    public class SmartStrategy: IStrategy
+    public class SmartCompressStrategy: ICompressStrategy
     {
         private int _currentPartIndex;
 

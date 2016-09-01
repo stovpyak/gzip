@@ -22,12 +22,19 @@ namespace ZipLib.QueueHandlers
         }
 
         readonly Stopwatch _processingStopwatch = new Stopwatch();
+        private long _sourceFileSize;
+        private long _totalReadByte; 
 
         protected override bool ProcessPart(FilePart part)
         {
             Logger.Add($"Поток {Thread.CurrentThread.Name} начал читать");
             if (_sourceStream == null)
-                _sourceStream = new FileStream(_sourceFileNameProvider.GetFileName(), FileMode.Open, FileAccess.Read);
+            {
+                var fileName = _sourceFileNameProvider.GetFileName();
+                var sourceFileInfo = new FileInfo(fileName);
+                _sourceFileSize = sourceFileInfo.Length;
+                _sourceStream = new FileStream(fileName, FileMode.Open, FileAccess.Read);
+            }
             try
             {
                 _processingStopwatch.Reset();
@@ -38,6 +45,14 @@ namespace ZipLib.QueueHandlers
 
                 _processingStopwatch.Stop();
                 Logger.Add($"Поток {Thread.CurrentThread.Name} прочитал в часть {part} {count} byte за {_processingStopwatch.ElapsedMilliseconds} ms");
+
+                _totalReadByte = _totalReadByte + count;
+                // прочитали всё - у части выставляем признак, что она последняя
+                if (_totalReadByte == _sourceFileSize)
+                {
+                    part.IsLast = true;
+                    Logger.Add($"Поток {Thread.CurrentThread.Name} прочитал последнюю часть файла {part} ");
+                }
             }
             catch (Exception)
             {

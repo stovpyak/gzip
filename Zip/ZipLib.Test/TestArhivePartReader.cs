@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ZipLib.Decompress;
+using ZipLib.Loggers;
 
 namespace ZipLib.Test
 {
@@ -15,7 +16,7 @@ namespace ZipLib.Test
             var inputStream = new MemoryStream();
             try
             {
-                var reader = new ArhivePartReader(inputStream);
+                var reader = new ArhivePartReader(new LoggerDummy(), inputStream, 0);
                 var part = new FilePart("dummyName");
                 var res = reader.ReadPart(part);
 
@@ -29,13 +30,15 @@ namespace ZipLib.Test
         }
 
         [TestMethod]
-        [ExpectedException(typeof(FormatException), "Должно быть исключение FormatException")]
+        [ExpectedException(typeof(FormatException), 
+            "Должно быть исключение FormatException, так как нет title")]
         public void TestWithoutTitle()
         {
-            var inputStream = MakeInputStream(new byte[] {12});
+            var input = new byte[] {12};
+            var inputStream = MakeInputStream(input);
             try
             {
-                var reader = new ArhivePartReader(inputStream);
+                var reader = new ArhivePartReader(new LoggerDummy(), inputStream, input.Length);
                 var part = new FilePart("dummyName");
                 reader.ReadPart(part);
             }
@@ -46,13 +49,15 @@ namespace ZipLib.Test
         }
 
         [TestMethod]
-        [ExpectedException(typeof(FormatException), "Должно быть исключение FormatException")]
+        [ExpectedException(typeof(FormatException), 
+            "Должно быть исключение FormatException, так как поток начинается не с title")]
         public void TestNotFirstTitle()
         {
-            var inputStream = MakeInputStream(new byte[] { 1, 31, 139, 8, 0, 0, 0, 0, 0, 4, 0 });
+            var input = new byte[] {1, 31, 139, 8, 0, 0, 0, 0, 0, 4, 0};
+            var inputStream = MakeInputStream(input);
             try
             {
-                var reader = new ArhivePartReader(inputStream);
+                var reader = new ArhivePartReader(new LoggerDummy(), inputStream, input.Length);
                 var part = new FilePart("dummyName");
                 reader.ReadPart(part);
             }
@@ -63,13 +68,25 @@ namespace ZipLib.Test
         }
 
         [TestMethod]
-        public void TestOnlyTitle()
+        public void TestOnlyTitleBigBuffer()
+        {
+            TestOnlyTitle(1000);
+        }
+
+        [TestMethod]
+        public void TestOnlyTitleSmallBuffer()
+        {
+            TestOnlyTitle(5);
+        }
+
+        public void TestOnlyTitle(int bufferSize)
         {
             var input = new byte[] {31, 139, 8, 0, 0, 0, 0, 0, 4, 0};
             var inputStream = MakeInputStream(input);
             try
             {
-                var reader = new ArhivePartReader(inputStream);
+                var reader = new ArhivePartReader(new LoggerDummy(), inputStream, input.Length);
+                reader.BufferSize = bufferSize;
                 var part = new FilePart("dummyName");
                 var res = reader.ReadPart(part);
 
@@ -83,15 +100,27 @@ namespace ZipLib.Test
             }
         }
 
+        [TestMethod]
+        public void TestTitleAndDataBigBuffer()
+        {
+            TestOnlyTitle(1000);
+        }
 
         [TestMethod]
-        public void TestTitleAndData()
+        public void TestTitleAndDataSmallBuffer()
+        {
+            TestOnlyTitle(5);
+        }
+
+
+        public void TestTitleAndData(int bufferSize)
         {
             var input = new byte[] { 31, 139, 8, 0, 0, 0, 0, 0, 4, 0, 1 };
             var inputStream = MakeInputStream(input);
             try
             {
-                var reader = new ArhivePartReader(inputStream);
+                var reader = new ArhivePartReader(new LoggerDummy(), inputStream, input.Length);
+                reader.BufferSize = bufferSize;
                 var part = new FilePart("dummyName");
                 var res = reader.ReadPart(part);
 
@@ -105,9 +134,19 @@ namespace ZipLib.Test
             }
         }
 
+        [TestMethod]
+        public void TestTitleDataAndSecondTitleBigBuffer()
+        {
+            TestOnlyTitle(1000);
+        }
 
         [TestMethod]
-        public void TestTitleDataAndSecondTitle()
+        public void TestTitleDataAndSecondTitleSmallBuffer()
+        {
+            TestOnlyTitle(5);
+        }
+
+        public void TestTitleDataAndSecondTitle(int bufferSize)
         {
             var input = new byte[] { 31, 139, 8, 0, 0, 0, 0, 0, 4, 0, 1, 31, 139, 8, 0, 0, 0, 0, 0, 4, 0 };
             var first = new byte[] { 31, 139, 8, 0, 0, 0, 0, 0, 4, 0, 1 };
@@ -116,7 +155,8 @@ namespace ZipLib.Test
             var inputStream = MakeInputStream(input);
             try
             {
-                var reader = new ArhivePartReader(inputStream);
+                var reader = new ArhivePartReader(new LoggerDummy(), inputStream, input.Length);
+                reader.BufferSize = bufferSize;
                 var firstPart = new FilePart("dummyName");
                 var res = reader.ReadPart(firstPart);
 

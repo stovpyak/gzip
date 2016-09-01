@@ -1,6 +1,6 @@
 ﻿namespace ZipLib.Strategies
 {
-    public interface IStrategy
+    public interface ICompressStrategy
     {
         void StartFile(long fileSize);
 

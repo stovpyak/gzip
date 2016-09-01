@@ -5,7 +5,7 @@ namespace ZipLib
     /// <summary>
     /// Собираем статистику работы архиваторов
     /// </summary>
-    public class ArchiversStatistic
+    public class ProcessStatistic
     {
         private readonly List<InfoItem> _items = new List<InfoItem>();
         private readonly object _lockOn = new object();

@@ -27,5 +27,16 @@ namespace ZipLib.Loggers
                 }
             }
         }
+
+        public void Close()
+        {
+            lock (_children)
+            {
+                foreach (var child in _children)
+                {
+                    child.Close();
+                }
+            }
+        }
     }
 }

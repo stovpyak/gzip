@@ -1,29 +1,36 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
+using ZipLib.Loggers;
 
 namespace ZipLib.Decompress
 {
     public class ArhivePartReader
     {
         private readonly Stream _archiveStream;
+        private readonly long _arhiveFileSize;
+        private readonly ILogger _logger;
 
-        public ArhivePartReader(Stream archiveStream)
+        public ArhivePartReader(ILogger logger, Stream archiveStream, long arhiveFileSize)
         {
+            _logger = logger;
             _archiveStream = archiveStream;
+            _arhiveFileSize = arhiveFileSize;
         }
         
         public int BufferSize { get; set; } = 1000;
 
-        private ArhivePortion _portionForNextPart;
+        private ArhivePortion _portionForNextPart; // todo rename portionFromPrev
+        private long _totalReadByte;
 
         public bool ReadPart(FilePart part)
         {
             // одна часть архива - она полностью пойдет на декомпрессию
             var archivePart = new ArchivePart();
+            ArhivePortion arhivePortion = null;
             while (archivePart != null)
             {
-                ArhivePortion arhivePortion = null;
                 if (_portionForNextPart != null)
                 {
                     // используем порцию оставщуюся с предыдущей части 
@@ -34,9 +41,23 @@ namespace ZipLib.Decompress
                 {
                     // читаем порцию из файла 
                     var buffer = new byte[BufferSize];
-                    var nRead = _archiveStream.Read(buffer, 0, buffer.Length);
-                    if (nRead > 0)
-                        arhivePortion = new ArhivePortion(new BytesBuffer(buffer, 0, nRead-1));
+                    var count = _archiveStream.Read(buffer, 0, buffer.Length);
+                    if (count > 0)
+                    {
+                        if (arhivePortion == null)
+                            arhivePortion = new ArhivePortion(new BytesBuffer(buffer, 0, count - 1));
+                        else
+                            // предыдущая порция закончилась на части заголовка
+                            arhivePortion.Append(new BytesBuffer(buffer, 0, count - 1));
+                    }
+
+                    _totalReadByte = _totalReadByte + count;
+                    // прочитали всё - у части выставляем признак, что она последняя
+                    if (_totalReadByte == _arhiveFileSize)
+                    {
+                        part.IsLast = true;
+                        _logger.Add($"Поток {Thread.CurrentThread.Name} прочитал последнюю часть файла {part} ");
+                    }
                 }
 
                 if (arhivePortion != null)
@@ -65,26 +86,20 @@ namespace ZipLib.Decompress
                                 {
                                     // записываем в часть все что до следеющего заголовка
                                     archivePart.AppendTitleAndDataBeforeNextTitle(arhivePortion);
-                                    
-                                    if (arhivePortion.IsNotEmpty)
-                                    {
-                                        // всё в part
-                                        part.Source = archivePart.ToArray();
-                                        // а остаток нужно "припасти" для следующей part
-                                        _portionForNextPart = arhivePortion;
-                                        return true;
-                                    }
-                                }
-                                // нашли заголовок для следующей части - значит текущая часть сформирована, а все что осталось в порции уже для следующей части
-                                else
-                                {
-                                    // порцию нужно "припасти" для следующей part
-                                    _portionForNextPart = arhivePortion;
-                                    arhivePortion = null;
                                     // всё в part
                                     part.Source = archivePart.ToArray();
-                                    archivePart = null;
+                                    if (arhivePortion.IsNotEmpty)
+                                        // а остаток нужно "припасти" для следующей part
+                                        _portionForNextPart = arhivePortion;
+                                    return true;
                                 }
+                                // нашли заголовок для следующей части - значит текущая часть сформирована, а все что осталось в порции уже для следующей части
+                                // порцию нужно "припасти" для следующей part
+                                _portionForNextPart = arhivePortion;
+                                arhivePortion = null;
+                                // всё в part
+                                part.Source = archivePart.ToArray();
+                                archivePart = null;  
                             }
                             else
                             {
@@ -96,10 +111,8 @@ namespace ZipLib.Decompress
                                 archivePart.AppendDataBeforeTitle(arhivePortion);
                                 // всё в part
                                 part.Source = archivePart.ToArray();
-                                archivePart = null;
                                 // порцию нужно "припасти" для следующей part
                                 _portionForNextPart = arhivePortion;
-                                arhivePortion = null;
                                 return true;
                             }
                         }
@@ -107,7 +120,7 @@ namespace ZipLib.Decompress
                         {
                             // нашли заголовок не полностью
                             // !!! окончить текущую часть не имеем права - не удостоверившись, что это заголовок
-                            return false;
+                            // поэтому здесь ничего не делаем, а выше прочитаем дополнительную порцию
                         }
                     }
                 }

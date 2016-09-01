@@ -72,10 +72,7 @@ namespace ZipLib.QueueHandlers
             return null;
         }
 
-        protected virtual bool ProcessPart(FilePart part)
-        {
-            return true;
-        }
+        protected abstract bool ProcessPart(FilePart part);
 
         private readonly Stopwatch _stopwatchWait = new Stopwatch();
         protected long TotalWait;

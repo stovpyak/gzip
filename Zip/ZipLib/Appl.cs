@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading;
 using ZipLib.Loggers;
 using ZipLib.QueueHandlers;
+using ZipLib.QueueHandlers.Readers;
 using ZipLib.Queues;
 using ZipLib.Strategies;
 
@@ -65,7 +66,8 @@ namespace ZipLib
             var archiversRuner = new ArchiversRuner(_logger, queueForArchivers, queueForWriter);
             _queueHandlers.Add(archiversRuner);
 
-            var reader = new Reader(_logger, sourceFileNameProvider, queueForReader, queueForArchivers);
+            var partReader = new FilePartReader(_logger);
+            var reader = new Reader(_logger, sourceFileNameProvider, partReader, queueForReader, queueForArchivers);
             _queueHandlers.Add(reader);
 
             
@@ -116,24 +118,24 @@ namespace ZipLib
 
             // создание очередей
             var loggerForQueue = new LoggerDummy();
-            var queueForReader = new PartQueue("ForReader", loggerForQueue);
-            _queues.Add(queueForReader);
+            var queueForRead = new PartQueue("ForRead", loggerForQueue);
+            _queues.Add(queueForRead);
             var queueForDecompress = new PartQueue("ForDecompress", loggerForQueue);
             _queues.Add(queueForDecompress);
-            var queueForWriter = new IndexedParts("ForWriter", loggerForQueue);
-            _queues.Add(queueForWriter);
-
+            var queueForWrite = new IndexedParts("ForWrite", loggerForQueue);
+            _queues.Add(queueForWrite);
+            
             var stopEvent = new ManualResetEventSlim(false);
             // создание обработчиков очередей
-            var writer = new Writer(_logger, targetFileNameProvider, stopEvent, queueForWriter, queueForReader);
+            var writer = new Writer(_logger, targetFileNameProvider, stopEvent, queueForWrite, queueForRead);
             _queueHandlers.Add(writer);
 
-            var decompressRuner = new DecompressRuner(_logger, queueForDecompress, queueForWriter);
+            var decompressRuner = new DecompressRuner(_logger, queueForDecompress, queueForWrite);
             _queueHandlers.Add(decompressRuner);
 
-            var reader = new ArchiveReader(_logger, sourceFileNameProvider, strategy, queueForReader, queueForDecompress);
+            var partReader = new ArсhivePartReader(_logger);
+            var reader = new Reader(_logger, sourceFileNameProvider, partReader, queueForRead, queueForDecompress);
             _queueHandlers.Add(reader);
-           
 
             var sourceFileInfo = new FileInfo(sourceFileName);
             _logger.Add($"Размер файла {sourceFileInfo.Length} byte");
@@ -145,7 +147,7 @@ namespace ZipLib
             for (var i = 0; i < strategy.GetMaxActivePartCount(); i++)
             {
                 var part = new FilePart($"FilePart{i + 1}");
-                queueForReader.Add(part);
+                queueForRead.Add(part);
             }
 
             // здесь выполнение остановится, пока кто нибудь не просигнализирует об окончании работы

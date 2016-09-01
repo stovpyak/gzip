@@ -26,7 +26,7 @@ namespace ZipLib.QueueHandlers
         {
             _archiversCount++;
             var archiverName = "ArchiverN" + _archiversCount;
-            var archiver = new Archiver(archiverName, Logger, _statistic, part, NextQueue);
+            var archiver = new Compressor(archiverName, Logger, _statistic, part, NextQueue);
             Logger.Add($"Поток {Thread.CurrentThread.Name} отдал part {part} archiver`у {archiverName}");
 
             archiver.Start();

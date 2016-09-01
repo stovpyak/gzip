@@ -2,29 +2,23 @@
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
+using ZipLib.Decompress;
 using ZipLib.Loggers;
 
-namespace ZipLib.Decompress
+namespace ZipLib.QueueHandlers.Readers
 {
-    public class ArhivePartReader
+    public class ArсhivePartReader: PartrReaderBase
     {
-        private readonly Stream _archiveStream;
-        private readonly long _arhiveFileSize;
-        private readonly ILogger _logger;
-
-        public ArhivePartReader(ILogger logger, Stream archiveStream, long arhiveFileSize)
+        public ArсhivePartReader(ILogger logger) : base(logger)
         {
-            _logger = logger;
-            _archiveStream = archiveStream;
-            _arhiveFileSize = arhiveFileSize;
         }
-        
+
         public int BufferSize { get; set; } = 1000;
 
         private ArhivePortion _portionForNextPart; // todo rename portionFromPrev
         private long _totalReadByte;
 
-        public bool ReadPart(FilePart part)
+        public override bool ReadPart(FilePart part)
         {
             // одна часть архива - она полностью пойдет на декомпрессию
             var archivePart = new ArchivePart();
@@ -41,7 +35,7 @@ namespace ZipLib.Decompress
                 {
                     // читаем порцию из файла 
                     var buffer = new byte[BufferSize];
-                    var count = _archiveStream.Read(buffer, 0, buffer.Length);
+                    var count = SourceStream.Read(buffer, 0, buffer.Length);
                     if (count > 0)
                     {
                         if (arhivePortion == null)
@@ -53,10 +47,10 @@ namespace ZipLib.Decompress
 
                     _totalReadByte = _totalReadByte + count;
                     // прочитали всё - у части выставляем признак, что она последняя
-                    if (_totalReadByte == _arhiveFileSize)
+                    if (_totalReadByte == SourceFileSize)
                     {
                         part.IsLast = true;
-                        _logger.Add($"Поток {Thread.CurrentThread.Name} прочитал последнюю часть файла {part} ");
+                        Logger.Add($"Поток {Thread.CurrentThread.Name} прочитал последнюю часть файла {part} ");
                     }
                 }
 

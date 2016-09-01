@@ -13,12 +13,12 @@ namespace ZipLib.QueueHandlers
         private Stream _targetStream;
 
         public Writer(ILogger logger, IFileNameProvider targetFileNameProvider, ManualResetEventSlim stopEvent,
-            IndexedParts sourceQueue, PartQueue nextQueue) : base(logger, sourceQueue, nextQueue)
+            IQueue sourceQueue, IQueue nextQueue) : base(logger, sourceQueue, nextQueue)
         {
             _targetFileNameProvider = targetFileNameProvider;
             _stopEvent = stopEvent;
 
-            InnerThread = new Thread(this.Run) {Name = "Writer"};
+            InnerThread = new Thread(Run) {Name = "Writer"};
             InnerThread.Start();
         }
 
@@ -34,21 +34,22 @@ namespace ZipLib.QueueHandlers
                 _targetStream = File.Create(_targetFileNameProvider.GetFileName());
 
             _targetStream.Write(part.Result, 0, part.Result.Length);
+            _currentPartIndex++;
 
             stopWatch.Stop();
             Logger.Add($"Поток {Thread.CurrentThread.Name} записал part {part} за {stopWatch.ElapsedMilliseconds} ms");
 
-            part.Result = null;
-            // часть последняя - сообщаем, что работа завершена
+            part.Result = null; // он теперь не нужен
+            NextQueue?.Add(part);
+
             if (part.IsLast)
             {
                 Logger.Add($"Поток {Thread.CurrentThread.Name} записал последнюю part - это признак завершения работы");
+                // часть последняя - сам поток решает, что ему пора остановиться
+                SetIsNeedStop();
+                // сообщаем, что работа завершена
                 _stopEvent.Set();
             }
-            else
-                NextQueue?.Add(part);
-
-            _currentPartIndex++;
             return true;
         }
 

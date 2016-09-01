@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ZipLib.Decompress;
 using ZipLib.Loggers;
+using ZipLib.QueueHandlers.Readers;
 
 namespace ZipLib.Test
 {
@@ -16,7 +17,8 @@ namespace ZipLib.Test
             var inputStream = new MemoryStream();
             try
             {
-                var reader = new ArhivePartReader(new LoggerDummy(), inputStream, 0);
+                var reader = new ArсhivePartReader(new LoggerDummy());
+                reader.Init(inputStream, 0);
                 var part = new FilePart("dummyName");
                 var res = reader.ReadPart(part);
 
@@ -38,7 +40,8 @@ namespace ZipLib.Test
             var inputStream = MakeInputStream(input);
             try
             {
-                var reader = new ArhivePartReader(new LoggerDummy(), inputStream, input.Length);
+                var reader = new ArсhivePartReader(new LoggerDummy());
+                reader.Init(inputStream, input.Length);
                 var part = new FilePart("dummyName");
                 reader.ReadPart(part);
             }
@@ -57,7 +60,8 @@ namespace ZipLib.Test
             var inputStream = MakeInputStream(input);
             try
             {
-                var reader = new ArhivePartReader(new LoggerDummy(), inputStream, input.Length);
+                var reader = new ArсhivePartReader(new LoggerDummy());
+                reader.Init(inputStream, input.Length);
                 var part = new FilePart("dummyName");
                 reader.ReadPart(part);
             }
@@ -85,7 +89,8 @@ namespace ZipLib.Test
             var inputStream = MakeInputStream(input);
             try
             {
-                var reader = new ArhivePartReader(new LoggerDummy(), inputStream, input.Length);
+                var reader = new ArсhivePartReader(new LoggerDummy());
+                reader.Init(inputStream, input.Length);
                 reader.BufferSize = bufferSize;
                 var part = new FilePart("dummyName");
                 var res = reader.ReadPart(part);
@@ -119,7 +124,8 @@ namespace ZipLib.Test
             var inputStream = MakeInputStream(input);
             try
             {
-                var reader = new ArhivePartReader(new LoggerDummy(), inputStream, input.Length);
+                var reader = new ArсhivePartReader(new LoggerDummy());
+                reader.Init(inputStream, input.Length);
                 reader.BufferSize = bufferSize;
                 var part = new FilePart("dummyName");
                 var res = reader.ReadPart(part);
@@ -155,7 +161,8 @@ namespace ZipLib.Test
             var inputStream = MakeInputStream(input);
             try
             {
-                var reader = new ArhivePartReader(new LoggerDummy(), inputStream, input.Length);
+                var reader = new ArсhivePartReader(new LoggerDummy());
+                reader.Init(inputStream, input.Length);
                 reader.BufferSize = bufferSize;
                 var firstPart = new FilePart("dummyName");
                 var res = reader.ReadPart(firstPart);

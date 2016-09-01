@@ -46,9 +46,9 @@ namespace ZipLib.Test
         [TestMethod]
         public void TestEmptyFile()
         {
-            var sourceFileName = TestDataFolder + "EmptyFile.txt";
-            var compressedFileName = TestDataFolder + "EmptyFile.gz";
-            var decompressedNewFileName = TestDataFolder + "EmptyFileNew.txt";
+            const string sourceFileName = TestDataFolder + "EmptyFile.txt";
+            const string compressedFileName = TestDataFolder + "EmptyFile.gz";
+            const string decompressedNewFileName = TestDataFolder + "EmptyFileNew.txt";
 
             TestCompressDecompressCheck(sourceFileName, compressedFileName, decompressedNewFileName);
         }
@@ -56,9 +56,9 @@ namespace ZipLib.Test
         [TestMethod]
         public void Test1Byte()
         {
-            var sourceFileName = TestDataFolder + "data_1byte.txt";
-            var compressedFileName = TestDataFolder + "data_1byte.gz";
-            var decompressedNewFileName = TestDataFolder + "data_1byte_new.txt";
+            const string sourceFileName = TestDataFolder + "data_1byte.txt";
+            const string compressedFileName = TestDataFolder + "data_1byte.gz";
+            const string decompressedNewFileName = TestDataFolder + "data_1byte_new.txt";
 
             TestCompressDecompressCheck(sourceFileName, compressedFileName, decompressedNewFileName);
          }
@@ -66,9 +66,9 @@ namespace ZipLib.Test
         [TestMethod]
         public void Test10Byte()
         {
-            var sourceFileName = TestDataFolder + "data_10byte.txt";
-            var compressedFileName = TestDataFolder + "data_10byte.gz";
-            var decompressedNewFileName = TestDataFolder + "data_10byte_new.txt";
+            const string sourceFileName = TestDataFolder + "data_10byte.txt";
+            const string compressedFileName = TestDataFolder + "data_10byte.gz";
+            const string decompressedNewFileName = TestDataFolder + "data_10byte_new.txt";
 
             TestCompressDecompressCheck(sourceFileName, compressedFileName, decompressedNewFileName);
         }

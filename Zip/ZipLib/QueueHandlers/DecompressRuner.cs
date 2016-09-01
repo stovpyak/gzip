@@ -24,8 +24,11 @@ namespace ZipLib.QueueHandlers
             var decompressorName = "DecomperssorN" + _decompressorCount;
             var decompressor = new Decompressor(decompressorName, Logger, _statistic, part, NextQueue);
             Logger.Add($"Поток {Thread.CurrentThread.Name} отдал part {part} decomperssor`у {decompressorName}");
-
             decompressor.Start();
+
+            // часть последняя - сам поток решает, что ему пора остановиться
+            if (part.IsLast)
+                SetIsNeedStop();
             return true;
         }
     }

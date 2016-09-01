@@ -81,7 +81,6 @@
     <Compile Include="ApplMode.cs" />
     <Compile Include="ProcessStatistic.cs" />
     <Compile Include="Decompress\ArchivePart.cs" />
-    <Compile Include="Decompress\ArhivePartReader.cs" />
     <Compile Include="Decompress\ArhivePortion.cs" />
     <Compile Include="Decompress\BytesBuffer.cs" />
     <Compile Include="Decompress\TitleSearcher.cs" />
@@ -101,6 +100,10 @@
     <Compile Include="QueueHandlers\PartInitializer.cs" />
     <Compile Include="QueueHandlers\QueueHandlerBase.cs" />
     <Compile Include="QueueHandlers\Reader.cs" />
+    <Compile Include="QueueHandlers\Readers\ArсhivePartReader.cs" />
+    <Compile Include="QueueHandlers\Readers\FilePartReader.cs" />
+    <Compile Include="QueueHandlers\Readers\IPartReader.cs" />
+    <Compile Include="QueueHandlers\Readers\PartrReaderBase.cs" />
     <Compile Include="QueueHandlers\Writer.cs" />
     <Compile Include="Queues\IQueue.cs" />
     <Compile Include="Queues\PartQueue.cs" />
@@ -111,7 +114,7 @@
     <Compile Include="Strategies\ICompressStrategy.cs" />
     <Compile Include="Strategies\SmartCompressStrategy.cs" />
     <Compile Include="Strategies\CompressStrategyStub.cs" />
-    <Compile Include="Workers\Archiver.cs" />
+    <Compile Include="Workers\Compressor.cs" />
     <Compile Include="Workers\Decompressor.cs" />
   </ItemGroup>
   <ItemGroup />

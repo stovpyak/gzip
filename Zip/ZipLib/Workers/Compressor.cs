@@ -10,7 +10,7 @@ namespace ZipLib.Workers
     /// <summary>
     /// Архивирует данные
     /// </summary>
-    public class Archiver
+    public class Compressor
     {
         private readonly Thread _thread;
         private readonly ILogger _logger;
@@ -19,7 +19,7 @@ namespace ZipLib.Workers
         private readonly FilePart _part;
         private readonly IQueue _nextQueue;
 
-        public Archiver(string name, ILogger logger, ProcessStatistic statistic, FilePart part, IQueue nextQueue)
+        public Compressor(string name, ILogger logger, ProcessStatistic statistic, FilePart part, IQueue nextQueue)
         {
             _logger = logger;
             _part = part;

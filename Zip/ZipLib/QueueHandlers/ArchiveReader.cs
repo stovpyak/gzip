@@ -4,6 +4,7 @@ using System.IO;
 using System.Threading;
 using ZipLib.Decompress;
 using ZipLib.Loggers;
+using ZipLib.QueueHandlers.Readers;
 using ZipLib.Queues;
 using ZipLib.Strategies;
 
@@ -15,36 +16,32 @@ namespace ZipLib.QueueHandlers
     public class ArchiveReader: QueueHandlerBase
     {
         private readonly IFileNameProvider _archiveFileNameProvider;
-        private readonly IDecompressStrategy _strategy;
         private FileStream _archiveStream;
 
-        public ArchiveReader(ILogger logger, IFileNameProvider archiveFileNameProvider, IDecompressStrategy strategy,
+        public ArchiveReader(ILogger logger, IFileNameProvider archiveFileNameProvider,
             IQueue sourceQueue, IQueue nextQueue) : 
             base(logger, sourceQueue, nextQueue)
         {
             _archiveFileNameProvider = archiveFileNameProvider;
-            _strategy = strategy;
 
             InnerThread = new Thread(this.Run) { Name = "ArchiveReader" };
             InnerThread.Start();
         }
 
         readonly Stopwatch _processingStopwatch = new Stopwatch();
-        private ArhivePartReader _arhivePartReader;
+        private IPartReader _partReader;
 
         private int _currentPartIndex;
-        private int _removedPartCount;
-
-
         protected override bool ProcessPart(FilePart part)
         {
-            Logger.Add($"Поток {Thread.CurrentThread.Name} начал читать");
             if (_archiveStream == null)
             {
                 var fileName = _archiveFileNameProvider.GetFileName();
                 _archiveStream = new FileStream(fileName, FileMode.Open, FileAccess.Read);
                 var sourceFileSize = new FileInfo(fileName).Length;
-                _arhivePartReader = new ArhivePartReader(Logger, _archiveStream, sourceFileSize);
+                var arhivePartReader = new ArсhivePartReader(Logger);
+                arhivePartReader.Init(_archiveStream, sourceFileSize);
+                _partReader = arhivePartReader;
             }
             try
             {
@@ -54,29 +51,25 @@ namespace ZipLib.QueueHandlers
                 // делегирует выполнение _arhivePartReader
                 // логика чтения и поиска заголовков получилась "ветиеватая", поэтому отдельный класс
                 // с public методами - так проще было тестировать
-                if (_arhivePartReader.ReadPart(part))
+                if (_partReader.ReadPart(part))
                 {
                     _processingStopwatch.Stop();
-                    Logger.Add($"Поток {Thread.CurrentThread.Name} прочитал в часть {part} за {_processingStopwatch.ElapsedMilliseconds} ms");
-
                     part.Index = _currentPartIndex;
                     _currentPartIndex++;
+                    Logger.Add($"Поток {Thread.CurrentThread.Name} прочитал часть {part} за {_processingStopwatch.ElapsedMilliseconds} ms");
+
                     NextQueue?.Add(part);
+
+                    // часть последняя - сам поток решает, что ему пора остановиться
+                    if (part.IsLast)
+                        SetIsNeedStop();
                     return true;
                 }
                 // не прочитал часть - архив закончился
                 {
-                    Logger.Add(
-                        $"!Поток {Thread.CurrentThread.Name} НЕ проинициализировал part {part} - архив прочитан");
-                    _removedPartCount++;
-                    if (_removedPartCount == _strategy.GetMaxActivePartCount())
-                    {
-                        Logger.Add(
-                            $"!Поток {Thread.CurrentThread.Name} выведены все обрабатываемые части {_removedPartCount} шт. - это признак того, что работа завершена");
-                    }
+                    Logger.Add($"!Поток {Thread.CurrentThread.Name} НЕ прочитал part {part} - архив прочитан");
                 }
                 return false;
-
             }
             catch (Exception)
             {
@@ -84,7 +77,6 @@ namespace ZipLib.QueueHandlers
                 Close();
                 throw;
             }
-          
         }
 
         protected override void Close()

@@ -37,6 +37,10 @@ namespace ZipLib.Decompress
 
         public void AppendDataBeforeTitle(ArhivePortion portion)
         {
+            if (_stream == null)
+                _stream = new MemoryStream();
+            var data = portion.ExtractDataBeforeTitle();
+            _stream.Write(data.InnerBuffer, data.StartPosition, data.Size);
 
         }
 
@@ -46,7 +50,7 @@ namespace ZipLib.Decompress
 
         public byte[] ToArray()
         {
-            return _stream.ToArray();
+            return _stream?.ToArray() ?? new byte[] {};
         }
     }
 }

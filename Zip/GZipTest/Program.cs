@@ -41,7 +41,7 @@ namespace GZipTest
                         appl.ExecuteCompress(compressStrategy, _sourceFileNameProvider, _targetFileNameProvider);
                         break;
                     case  ApplMode.Decompress:
-                        var decompressStrategy = new DecompressStrategyStub(1);
+                        var decompressStrategy = new DecompressStrategyStub(5);
                         appl.ExecuteDecompress(decompressStrategy, _sourceFileNameProvider, _targetFileNameProvider);
                         break;
                 }

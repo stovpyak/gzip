@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.IO;
 using System.Threading;
 using ZipLib.Decompress;
 using ZipLib.Loggers;
@@ -13,7 +12,7 @@ namespace ZipLib.QueueHandlers.Readers
         {
         }
 
-        public int BufferSize { get; set; } = 1000;
+        public int BufferSize { get; set; } = 10000;
 
         private ArhivePortion _portionForNextPart; // todo rename portionFromPrev
         private long _totalReadByte;
@@ -41,8 +40,15 @@ namespace ZipLib.QueueHandlers.Readers
                         if (arhivePortion == null)
                             arhivePortion = new ArhivePortion(new BytesBuffer(buffer, 0, count - 1));
                         else
-                            // предыдущая порция закончилась на части заголовка
+                        // предыдущая порция закончилась на части заголовка
                             arhivePortion.Append(new BytesBuffer(buffer, 0, count - 1));
+                    }
+                    else
+                    {
+                        // всё в part
+                        part.Source = archivePart.ToArray();
+                        part.IsLast = true;
+                        return true;
                     }
 
                     _totalReadByte = _totalReadByte + count;
@@ -80,26 +86,27 @@ namespace ZipLib.QueueHandlers.Readers
                                 {
                                     // записываем в часть все что до следеющего заголовка
                                     archivePart.AppendTitleAndDataBeforeNextTitle(arhivePortion);
-                                    // всё в part
-                                    part.Source = archivePart.ToArray();
                                     if (arhivePortion.IsNotEmpty)
                                         // а остаток нужно "припасти" для следующей part
                                         _portionForNextPart = arhivePortion;
-                                    return true;
+                                    arhivePortion = null;
                                 }
-                                // нашли заголовок для следующей части - значит текущая часть сформирована, а все что осталось в порции уже для следующей части
-                                // порцию нужно "припасти" для следующей part
-                                _portionForNextPart = arhivePortion;
-                                arhivePortion = null;
-                                // всё в part
-                                part.Source = archivePart.ToArray();
-                                archivePart = null;  
+                                else
+                                {
+                                    // нашли заголовок для следующей части - значит текущая часть сформирована, а все что осталось в порции уже для следующей части
+                                    // порцию нужно "припасти" для следующей part
+                                    _portionForNextPart = arhivePortion;
+                                    arhivePortion = null;
+                                    // всё в part
+                                    part.Source = archivePart.ToArray();
+                                    archivePart = null;
+                                }
                             }
                             else
                             {
                                 // заголовок не в начале порции
                                 if (archivePart.IsEmpty)
-                                    throw new FormatException("Часть ещё пустая, а в порции заголовок не в начале - неверный формат архива");
+                                    throw new FormatException($"part {part}. archivePart ещё пустая, а в порции заголовок не в начале - неверный формат архива");
 
                                 // добавляем в часть всё что до заголовка
                                 archivePart.AppendDataBeforeTitle(arhivePortion);

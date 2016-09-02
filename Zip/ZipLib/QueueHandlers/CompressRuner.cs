@@ -9,14 +9,14 @@ namespace ZipLib.QueueHandlers
     /// Следит за очередью частей готовых для архивирования
     /// Запускает потоки для архивации частей
     /// </summary>
-    public class ArchiversRuner: QueueHandlerBase
+    public class CompressRuner: QueueHandlerBase
     {
         private readonly ProcessStatistic _statistic = new ProcessStatistic();
 
-        public ArchiversRuner(ILogger logger, IQueue sourceQueue, IQueue nextQueue)
+        public CompressRuner(ILogger logger, IQueue sourceQueue, IQueue nextQueue)
             :base(logger, sourceQueue, nextQueue)
         {
-            InnerThread = new Thread(this.Run) { Name = "ArchiversRuner" };
+            InnerThread = new Thread(this.Run) { Name = "CompressRuner" };
             InnerThread.Start();
         }
 
@@ -36,6 +36,7 @@ namespace ZipLib.QueueHandlers
         protected override void AddTotalToLog()
         {
             base.AddTotalToLog();
+            Logger.Add($"Поток {Thread.CurrentThread.Name} общее время compress {_statistic.GetTotalTime()} ms");
             Logger.Add($"Поток {Thread.CurrentThread.Name} среднее время архивирования одной части {_statistic.GetMiddleElapsedTime()} ms");
         }
     }

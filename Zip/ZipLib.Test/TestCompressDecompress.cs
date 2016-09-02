@@ -41,6 +41,31 @@ namespace ZipLib.Test
             IsFilesEquals(sourceFileName, decompressedNewFileName);
         }
 
+        private void TestDecompressCheck(string sourceFileName,
+            string compressedFileName, string decompressedNewFileName)
+        {
+            // prepare
+            if (File.Exists(decompressedNewFileName))
+                File.Delete(decompressedNewFileName);
+            Assert.IsFalse(File.Exists(decompressedNewFileName),
+                "Не удалось удалить разархивированный файл перед началом теста");
+
+            // init
+            //var logger = new LoggerDummy();
+            var logger = new FileLogger("test.log");
+            var appl = new Appl(logger);
+
+            var archive = new FileNameProviderStub(compressedFileName);
+            var decompress = new FileNameProviderStub(decompressedNewFileName);
+            var decompressStrategy = new DecompressStrategyStub(1);
+            appl.ExecuteDecompress(decompressStrategy, archive, decompress);
+            logger.Close();
+
+            Assert.IsTrue(File.Exists(compressedFileName), "Файл разархивированный не обнаружен после разархивации");
+
+            IsFilesEquals(sourceFileName, decompressedNewFileName);
+        }
+
         private const string TestDataFolder = "..\\..\\..\\TestData\\";
 
         [TestMethod]
@@ -69,6 +94,16 @@ namespace ZipLib.Test
             const string sourceFileName = TestDataFolder + "data_10byte.txt";
             const string compressedFileName = TestDataFolder + "data_10byte.gz";
             const string decompressedNewFileName = TestDataFolder + "data_10byte_new.txt";
+
+            TestCompressDecompressCheck(sourceFileName, compressedFileName, decompressedNewFileName);
+        }
+
+        [TestMethod]
+        public void Test10MByte()
+        {
+            const string sourceFileName = TestDataFolder + "data_mb10.txt";
+            const string compressedFileName = TestDataFolder + "data_mb10.gz";
+            const string decompressedNewFileName = TestDataFolder + "data_mb10_new.txt";
 
             TestCompressDecompressCheck(sourceFileName, compressedFileName, decompressedNewFileName);
         }

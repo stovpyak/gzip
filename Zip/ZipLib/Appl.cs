@@ -63,7 +63,7 @@ namespace ZipLib
             var writer = new Writer(_logger, targetFileNameProvider, stopEvent, queueForWriter, queueEmpty);
             _queueHandlers.Add(writer);
 
-            var archiversRuner = new ArchiversRuner(_logger, queueForArchivers, queueForWriter);
+            var archiversRuner = new CompressRuner(_logger, queueForArchivers, queueForWriter);
             _queueHandlers.Add(archiversRuner);
 
             var partReader = new FilePartReader(_logger);

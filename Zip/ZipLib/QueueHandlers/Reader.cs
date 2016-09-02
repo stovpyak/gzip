@@ -46,7 +46,7 @@ namespace ZipLib.QueueHandlers
 
                     part.Index = _currentPartIndex;
                     _currentPartIndex++;
-                    Logger.Add($"Поток {Thread.CurrentThread.Name} прочитал часть {part} за {_processingStopwatch.ElapsedMilliseconds} ms");
+                    Logger.Add($"Поток {Thread.CurrentThread.Name} прочитал часть {part} {part.Source.Length} byte за {_processingStopwatch.ElapsedMilliseconds} ms");
 
                     NextQueue?.Add(part);
 

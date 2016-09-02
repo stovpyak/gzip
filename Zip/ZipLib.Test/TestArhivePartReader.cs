@@ -14,6 +14,7 @@ namespace ZipLib.Test
         [TestMethod]
         public void TestEmptyStream()
         {
+            var input = new byte[] {};
             var inputStream = new MemoryStream();
             try
             {
@@ -22,8 +23,10 @@ namespace ZipLib.Test
                 var part = new FilePart("dummyName");
                 var res = reader.ReadPart(part);
 
-                Assert.IsFalse(res, "удалось проинициализировать part из пустого потока");
-                Assert.IsNull(part.Source, "у непроинициализированной части source должен быть Null");
+                Assert.IsTrue(res, "не удалось проинициализировать part из пустого потока");
+                Assert.IsNotNull(part.Source, "у непроинициализированной части source должен быть Null");
+                Assert.IsTrue(part.Source.SequenceEqual(input), "part.Source");
+                Assert.IsTrue(part.IsLast, "part.IsLast");
             }
             finally
             {
@@ -98,6 +101,7 @@ namespace ZipLib.Test
                 Assert.IsTrue(res, "не удалось проинициализировать часть");
                 Assert.IsNotNull(part.Source, "part.Source = null");
                 Assert.IsTrue(input.SequenceEqual(part.Source), "неверный part.Source");
+                Assert.IsTrue(part.IsLast, "part.IsLast");
             }
             finally
             {
@@ -133,6 +137,7 @@ namespace ZipLib.Test
                 Assert.IsTrue(res, "не удалось проинициализировать часть");
                 Assert.IsNotNull(part.Source, "part.Source = null");
                 Assert.IsTrue(input.SequenceEqual(part.Source), "неверный part.Source");
+                Assert.IsTrue(part.IsLast, "part.IsLast");
             }
             finally
             {
@@ -170,6 +175,7 @@ namespace ZipLib.Test
                 Assert.IsTrue(res, "не удалось проинициализировать firstPart");
                 Assert.IsNotNull(firstPart.Source, "firstPart.Source = null");
                 Assert.IsTrue(first.SequenceEqual(firstPart.Source), "неверный firstPart.Source");
+                Assert.IsFalse(firstPart.IsLast, "firstPart.IsLast");
 
                 var secondPart = new FilePart("dummyName");
                 res = reader.ReadPart(secondPart);
@@ -177,6 +183,7 @@ namespace ZipLib.Test
                 Assert.IsTrue(res, "не удалось проинициализировать secondPart");
                 Assert.IsNotNull(secondPart.Source, "secondPart.Source = null");
                 Assert.IsTrue(second.SequenceEqual(secondPart.Source), "неверный secondPart.Source");
+                Assert.IsTrue(secondPart.IsLast, "firstPart.IsLast");
             }
             finally
             {

@@ -59,6 +59,20 @@ namespace ZipLib.Decompress
             return bytesBuffer;
         }
 
+        public BytesBuffer ExtractDataBeforeTitle()
+        {
+            Debug.Assert(IsNotEmpty, "порция не должена быть пустой");
+            Debug.Assert(IsExistsTitle, "для извлечения заголовка и данных нужно чтобы заголовок был");
+
+            var indexStart = _bytesBuffer.StartPosition;
+            var indexEnd = _titlesInfo[0].IndexStartTitle - 1;
+
+            var bytesBuffer = new BytesBuffer(_bytesBuffer.InnerBuffer, indexStart, indexEnd);
+            // сдвигаем курсоры у своего - чтобы осталось только то что не отдал
+            _bytesBuffer.StartPosition = indexEnd + 1;
+            return bytesBuffer;
+        }
+
         public void Append(BytesBuffer bytesBuffer)
         {
             var newBuffer = new byte[_bytesBuffer.Size + bytesBuffer.Size];

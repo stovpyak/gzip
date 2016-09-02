@@ -22,6 +22,9 @@ namespace ZipLib.QueueHandlers
             NextQueue = nextQueue;
         }
 
+        private readonly Stopwatch _stopwatchProcess = new Stopwatch();
+        protected long TotalProcess;
+
         private int _processedPartCount;
 
         protected void Run()
@@ -31,8 +34,15 @@ namespace ZipLib.QueueHandlers
                 var part = SourceQueue.GetPart(GetParamForGetPart());
                 if (part != null)
                 {
+                    _stopwatchProcess.Reset();
+                    _stopwatchProcess.Start();
                     if (ProcessPart(part))
+                    {
                         _processedPartCount++;
+                    }
+                    _stopwatchProcess.Stop();
+                    TotalProcess = TotalProcess + _stopwatchProcess.ElapsedMilliseconds;
+                    Logger.Add($"Поток {Thread.CurrentThread.Name} время обработки части {part} {_stopwatchWait.ElapsedMilliseconds} ms");
                 }
                 else
                     WaitQueue();
@@ -96,6 +106,7 @@ namespace ZipLib.QueueHandlers
         {
             Logger.Add($"Поток {Thread.CurrentThread.Name} завершил свой run");
             Logger.Add($"Поток {Thread.CurrentThread.Name} обработано {_processedPartCount} частей");
+            Logger.Add($"Поток {Thread.CurrentThread.Name} общее время обработки частей {TotalProcess} ms");
             Logger.Add($"Поток {Thread.CurrentThread.Name} общее время ожидания поступления частей {TotalWait} ms");
         }
 

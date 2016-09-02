@@ -31,5 +31,13 @@ namespace ZipLib.QueueHandlers
                 SetIsNeedStop();
             return true;
         }
+
+        protected override void AddTotalToLog()
+        {
+            base.AddTotalToLog();
+            Logger.Add($"Поток {Thread.CurrentThread.Name} общее время decompress {_statistic.GetTotalTime()} ms");
+            Logger.Add($"Поток {Thread.CurrentThread.Name} среднее время decompress одной части {_statistic.GetMiddleElapsedTime()} ms");
+        }
+
     }
 }

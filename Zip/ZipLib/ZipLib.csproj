@@ -94,7 +94,7 @@
     <Compile Include="Loggers\FileLogger.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueueHandlers\ArchiveReader.cs" />
-    <Compile Include="QueueHandlers\ArchiversRuner.cs" />
+    <Compile Include="QueueHandlers\CompressRuner.cs" />
     <Compile Include="QueueHandlers\DecompressRuner.cs" />
     <Compile Include="QueueHandlers\IQueueHandler.cs" />
     <Compile Include="QueueHandlers\PartInitializer.cs" />

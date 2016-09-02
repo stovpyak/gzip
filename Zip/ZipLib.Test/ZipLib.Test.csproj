@@ -70,6 +70,7 @@
   <ItemGroup>
     <Compile Include="TestArhivePartReader.cs" />
     <Compile Include="TestArhivePortion\TestAppend.cs" />
+    <Compile Include="TestArhivePortion\TestExtractDataBeforeTitle.cs" />
     <Compile Include="TestArhivePortion\TestExtractFirstTitleAndData.cs" />
     <Compile Include="TestArhivePortion\TestMake.cs" />
     <Compile Include="TestBytesBuffer.cs" />

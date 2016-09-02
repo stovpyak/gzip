@@ -33,6 +33,16 @@ namespace ZipLib
                 return sum/_items.Count;
             }
         }
+        public long GetTotalTime()
+        {
+            lock (_lockOn)
+            {
+                long sum = 0;
+                foreach (var item in _items)
+                    sum = sum + item.ElapsedMilliseconds;
+                return sum;
+            }
+        }
 
         private class InfoItem
         {

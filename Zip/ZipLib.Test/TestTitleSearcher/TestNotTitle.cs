@@ -1,5 +1,4 @@
-﻿using System.Runtime.Remoting;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ZipLib.Decompress;
 
 namespace ZipLib.Test.TestTitleSearcher

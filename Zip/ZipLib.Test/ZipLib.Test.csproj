@@ -76,9 +76,8 @@
     <Compile Include="TestBytesBuffer.cs" />
     <Compile Include="TestCompressDecompress.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TestCompressStrategyStub.cs" />
     <Compile Include="TestStrategy.cs" />
-    <Compile Include="TestStrategyStub\TestByPartCount.cs" />
-    <Compile Include="TestStrategyStub\TestByPartSize.cs" />
     <Compile Include="TestTitleSearcher\ExistsTitle.cs" />
     <Compile Include="TestTitleSearcher\PartTitle.cs" />
     <Compile Include="TestTitleSearcher\TestNotTitle.cs" />

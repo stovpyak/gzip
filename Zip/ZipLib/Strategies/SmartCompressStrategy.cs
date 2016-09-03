@@ -7,94 +7,45 @@ namespace ZipLib.Strategies
     /// </summary>
     public class SmartCompressStrategy: ICompressStrategy
     {
-        private int _currentPartIndex;
+        private readonly ISystemInfoProvider _systemInfoProvider;
+        private int _partSize = -1;
 
-        private int _partSize;
-        private long _partCount;
-
-        private long _remainderFileLength;
-
-        public void StartFile(long fileSize)
+        public SmartCompressStrategy(ISystemInfoProvider systemInfoProvider)
         {
-            _currentPartIndex = 0;
-            _remainderFileLength = fileSize;
-            InitPartSize();
-            InitPartCount();
+            _systemInfoProvider = systemInfoProvider;
+        }
+
+        public int MaxActivePartCount
+        {
+            get
+            {
+                // считаем, что масимально кол-во частей одновременно обрабатываемых в системе 
+                //  правильно брать = количеству ядер + 30%
+                return Convert.ToInt32(_systemInfoProvider.ProcessorCount*1.3);
+            }
+        }
+
+        public int PartSize
+        {
+            get
+            {
+                if (_partSize == -1)
+                    _partSize = GetPartSize();
+                return _partSize;
+            }
         }
 
         /// <summary>
         /// Размер одной части файла
         /// </summary>
-        private void InitPartSize()
+        private int GetPartSize()
         {
-            // делим на 2, так как в одной части присутствует прочитанная часть и обработанная
-            var lPartSize = GetAvailableMemoryForAppl() / GetMaxActivePartCount() / 2;
+            // делим на 2, так как в одной части присутствует и прочитанная часть и обработанная
+            // мы заранее не знаем степень сжатия - поэтому 2 
+            var lPartSize = _systemInfoProvider.AvailableMemoryForAppl / MaxActivePartCount / 2;
             if (lPartSize > int.MaxValue)
                 throw new Exception("размер части > int.MaxValue");
-            _partSize = (int)lPartSize;
-            if (_remainderFileLength < _partSize)
-                _partSize = (int)_remainderFileLength;
-        }
-        
-        private void InitPartCount()
-        {
-            if (_partSize == 0)
-                _partCount = 1;
-            else
-            {
-                var count = _remainderFileLength / _partSize;
-                if (_remainderFileLength % _partSize > 0)
-                    count++;
-                _partCount = count;
-            }
-        }
-
-        public int GetMaxActivePartCount()
-        {
-            // считаем, что мкасимально кол-во частей одновременно обрабатываемых в системе 
-            //  правильно брать = количеству ядер + 30%
-            return Convert.ToInt32(Environment.ProcessorCount * 1.3);
-        }
-
-        public long GetPartCount()
-        {
-            return _partCount;
-        }
-
-        public int GetPatrSize()
-        {
-            return _partSize;
-        }
-
-        /// <summary>
-        /// Возвращает доступный объем памяти для приложения
-        /// </summary>
-        /// <returns></returns>
-        private long GetAvailableMemoryForAppl()
-        {
-            // В 32 - битных программах размер динамически выделяемой памяти ограничен 2 GB, в 64 - битных — 8 TB.
-            // todo: потом нужно учтитывать, что оперативной памяти может быть на машине меньше
-
-            long oneGb = 1024 * 1024 * 1024;
-            var value = oneGb * 1.6;
-            var valueInGb = Convert.ToInt64(value);
-            return valueInGb;
-        }
-
-        public bool InitNextFilePart(FilePart part)
-        {
-            if ((_remainderFileLength <= 0) && (_currentPartIndex != 0))
-                return false;
-
-            part.Index = _currentPartIndex;
-            if (_remainderFileLength < _partSize)
-                _partSize = (int)_remainderFileLength;
-            part.SourceSize = _partSize;
-
-            _remainderFileLength = _remainderFileLength - _partSize;
-
-            _currentPartIndex++;
-            return true;
+            return (int)lPartSize;
         }
     }
 }

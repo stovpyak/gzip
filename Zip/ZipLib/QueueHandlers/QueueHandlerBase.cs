@@ -91,7 +91,9 @@ namespace ZipLib.QueueHandlers
         {
             _stopwatchWait.Reset();
             _stopwatchWait.Start();
+
             SourceQueue.ChangeEvent.WaitOne();
+
             _stopwatchWait.Stop();
             TotalWait = TotalWait + _stopwatchWait.ElapsedMilliseconds;
             Logger.Add($"Поток {Thread.CurrentThread.Name} время ожидания {_stopwatchWait.ElapsedMilliseconds} ms");

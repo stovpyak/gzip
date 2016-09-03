@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ZipLib.Strategies;
 
 namespace ZipLib.Test
@@ -6,31 +7,24 @@ namespace ZipLib.Test
     [TestClass]
     public class TestStrategy
     {
-
         [TestMethod]
-        public void TestEmptyFile()
+        public void Test4ProcessorsX86()
         {
-            var strategy = new SmartCompressStrategy();
-            strategy.StartFile(0);
-            Assert.AreEqual(1, strategy.GetPartCount(), "part count");
+            var systemInfoProvider = new SystemInfoProviderStub(4, Convert.ToInt64(1024 * 1024 * 1024 * 1.6));
+            var strategy = new SmartCompressStrategy(systemInfoProvider);
 
-            var part = new FilePart("dummyPartName");
-            var resInit = strategy.InitNextFilePart(part);
-            Assert.IsTrue(resInit, "не удалось проиницализировать часть");
-            Assert.AreEqual(0, part.SourceSize, "size");
+            Assert.AreEqual(5, strategy.MaxActivePartCount, "MaxActivePartCount");
+            Assert.AreEqual(171798691, strategy.PartSize, "PartSize");
         }
 
         [TestMethod]
-        public void TestOnePart()
+        public void Test4ProcessorsX64_10GB()
         {
-            var strategy = new SmartCompressStrategy();
-            strategy.StartFile(100);
-            Assert.AreEqual(1, strategy.GetPartCount(), "part count");
+            var systemInfoProvider = new SystemInfoProviderStub(4, Convert.ToInt64(1024 * 1024 * 1024 * 10.0));
+            var strategy = new SmartCompressStrategy(systemInfoProvider);
 
-            var part = new FilePart("dummyPartName");
-            var resInit = strategy.InitNextFilePart(part);
-            Assert.IsTrue(resInit, "не удалось проиницализировать часть");
-            Assert.AreEqual(100, part.SourceSize, "size");
+            Assert.AreEqual(5, strategy.MaxActivePartCount, "MaxActivePartCount");
+            Assert.AreEqual(1073741824, strategy.PartSize, "PartSize");
         }
     }
 }

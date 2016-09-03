@@ -35,9 +35,9 @@ namespace GZipTest
                 switch (param.ApplMode)
                 {
                     case ApplMode.Compress:
-                        var compressStrategy = new SmartCompressStrategy();
+                        var systemInfoProvider = new SystemInfoProvider();
+                        var compressStrategy = new SmartCompressStrategy(systemInfoProvider);
                         //var compressStrategy = CompressStrategyStub.MakeByPartSize(4, 100 * 1024 * 1024);
-                        //var compressStrategy = CompressStrategyStub.MakeByPartCount(5, 130);
                         appl.ExecuteCompress(compressStrategy, _sourceFileNameProvider, _targetFileNameProvider);
                         break;
                     case  ApplMode.Decompress:

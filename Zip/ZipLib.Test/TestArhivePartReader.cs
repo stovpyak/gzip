@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ZipLib.Decompress;
 using ZipLib.Loggers;
 using ZipLib.QueueHandlers.Readers;
 

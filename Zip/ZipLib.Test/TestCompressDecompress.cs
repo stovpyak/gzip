@@ -29,38 +29,15 @@ namespace ZipLib.Test
 
             var source = new FileNameProviderStub(sourceFileName);
             var archive = new FileNameProviderStub(compressedFileName);
-            var strategy = new SmartCompressStrategy();
+
+            var systemInfoProvider = new SystemInfoProvider();
+            var strategy = new SmartCompressStrategy(systemInfoProvider);
             appl.ExecuteCompress(strategy, source, archive);
             Assert.IsTrue(File.Exists(compressedFileName), "Файл архива не обнаружен после архивации");
 
             var decompress = new FileNameProviderStub(decompressedNewFileName);
             var decompressStrategy = new DecompressStrategyStub(1);
             appl.ExecuteDecompress(decompressStrategy, archive, decompress);
-            Assert.IsTrue(File.Exists(compressedFileName), "Файл разархивированный не обнаружен после разархивации");
-
-            IsFilesEquals(sourceFileName, decompressedNewFileName);
-        }
-
-        private void TestDecompressCheck(string sourceFileName,
-            string compressedFileName, string decompressedNewFileName)
-        {
-            // prepare
-            if (File.Exists(decompressedNewFileName))
-                File.Delete(decompressedNewFileName);
-            Assert.IsFalse(File.Exists(decompressedNewFileName),
-                "Не удалось удалить разархивированный файл перед началом теста");
-
-            // init
-            //var logger = new LoggerDummy();
-            var logger = new FileLogger("test.log");
-            var appl = new Appl(logger);
-
-            var archive = new FileNameProviderStub(compressedFileName);
-            var decompress = new FileNameProviderStub(decompressedNewFileName);
-            var decompressStrategy = new DecompressStrategyStub(1);
-            appl.ExecuteDecompress(decompressStrategy, archive, decompress);
-            logger.Close();
-
             Assert.IsTrue(File.Exists(compressedFileName), "Файл разархивированный не обнаружен после разархивации");
 
             IsFilesEquals(sourceFileName, decompressedNewFileName);

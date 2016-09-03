@@ -49,40 +49,32 @@ namespace ZipLib
 
             // создание очередей
             var loggerForQueue = new LoggerDummy();
-            var queueEmpty = new PartQueue("Empty", loggerForQueue);
-            _queues.Add(queueEmpty);
-            var queueForReader = new PartQueue("ForReader", loggerForQueue);
-            _queues.Add(queueForReader);
-            var queueForArchivers = new PartQueue("ForArchivers", loggerForQueue);
-            _queues.Add(queueForArchivers);
-            var queueForWriter = new IndexedParts("ForWriter", loggerForQueue);
-            _queues.Add(queueForWriter);
+            var queueForRead = new PartQueue("ForRead", loggerForQueue);
+            _queues.Add(queueForRead);
+            var queueForCompress = new PartQueue("ForCompress", loggerForQueue);
+            _queues.Add(queueForCompress);
+            var queueForWrite = new IndexedParts("ForWrite", loggerForQueue);
+            _queues.Add(queueForWrite);
 
             var stopEvent = new ManualResetEventSlim(false);
             // создание обработчиков очередей
-            var writer = new Writer(_logger, targetFileNameProvider, stopEvent, queueForWriter, queueEmpty);
+            var writer = new Writer(_logger, targetFileNameProvider, stopEvent, queueForWrite, queueForRead);
             _queueHandlers.Add(writer);
 
-            var archiversRuner = new CompressRuner(_logger, queueForArchivers, queueForWriter);
+            var archiversRuner = new CompressRuner(_logger, queueForCompress, queueForWrite);
             _queueHandlers.Add(archiversRuner);
 
-            var partReader = new FilePartReader(_logger);
-            var reader = new Reader(_logger, sourceFileNameProvider, partReader, queueForReader, queueForArchivers);
+            var partReader = new FilePartReader(_logger, strategy);
+            var reader = new Reader(_logger, sourceFileNameProvider, partReader, queueForRead, queueForCompress);
             _queueHandlers.Add(reader);
-
-            
-            var partInitializer = new PartInitializer(_logger, strategy, queueEmpty, queueForReader);
-            _queueHandlers.Add(partInitializer);
 
             // вывод отладочной информации
             var sourceFileInfo = new FileInfo(sourceFileName);
             _logger.Add($"Размер файла {sourceFileInfo.Length} byte");
 
-            strategy.StartFile(sourceFileInfo.Length);
-            var maxActivePartCount = strategy.GetMaxActivePartCount();
+            var maxActivePartCount = strategy.MaxActivePartCount;
             _logger.Add($"Максимальное кол-во одновременно обрабатываемых частей {maxActivePartCount} шт.");
-            _logger.Add($"Всего частей {strategy.GetPartCount()} шт.");
-            _logger.Add($"Размер одной части {strategy.GetPatrSize()} byte");
+            _logger.Add($"Размер одной части {strategy.PartSize} byte");
             _logger.Add("Работа начата...");
 
             var stopWatch = new Stopwatch();
@@ -91,7 +83,7 @@ namespace ZipLib
             for (var i = 0; i < maxActivePartCount; i++)
             {
                 var part = new FilePart($"FilePart{i + 1}");
-                queueEmpty.Add(part);
+                queueForRead.Add(part);
             }
 
             // здесь выполнение остановится, пока кто нибудь не просигнализирует об окончании работы

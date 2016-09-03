@@ -2,12 +2,7 @@
 {
     public interface ICompressStrategy
     {
-        void StartFile(long fileSize);
-
-        int GetMaxActivePartCount();
-        long GetPartCount();
-        int GetPatrSize();
-
-        bool InitNextFilePart(FilePart part);
+        int MaxActivePartCount { get; }
+        int PartSize { get; }
     }
 }

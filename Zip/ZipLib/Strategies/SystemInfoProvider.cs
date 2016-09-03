@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace ZipLib.Strategies
 {
@@ -19,5 +20,7 @@ namespace ZipLib.Strategies
                 return valueInGb;
             }
         }
+
+        public bool Is64Bit => Marshal.SizeOf(typeof(IntPtr)) == 8;
     }
 }

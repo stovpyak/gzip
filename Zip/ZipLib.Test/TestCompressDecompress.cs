@@ -84,7 +84,7 @@ namespace ZipLib.Test
 
             TestCompressDecompressCheck(sourceFileName, compressedFileName, decompressedNewFileName);
         }
-
+    
         private void IsFilesEquals(string firstFileName, string secondFileName)
         {
             var firstMd5 = GetFileMd5(firstFileName);

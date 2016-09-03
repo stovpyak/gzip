@@ -20,7 +20,7 @@ namespace ZipLib.QueueHandlers
         {
             _workerCount++;
             var name = "DecompressorN" + _workerCount;
-            var newWoker = new Decompressor(name, Logger, NextQueue);
+            var newWoker = new Decompressor(name, Logger, Statistic, NextQueue);
             return newWoker;
         }
     }

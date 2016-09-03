@@ -91,6 +91,7 @@
     <Compile Include="Loggers\CompositeLogger.cs" />
     <Compile Include="Loggers\LoggerDummy.cs" />
     <Compile Include="Loggers\FileLogger.cs" />
+    <Compile Include="ProcessStatistic.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueueHandlers\CompressRuner.cs" />
     <Compile Include="QueueHandlers\DecompressRuner.cs" />

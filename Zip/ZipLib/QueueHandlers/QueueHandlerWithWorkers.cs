@@ -7,6 +7,8 @@ namespace ZipLib.QueueHandlers
 {
     public abstract class QueueHandlerWithWorkers: QueueHandlerBase
     {
+        protected ProcessStatistic Statistic = new ProcessStatistic();
+
         protected QueueHandlerWithWorkers(ILogger logger, IQueue sourceQueue, IQueue nextQueue) : 
             base(logger, sourceQueue, nextQueue)
         {
@@ -25,5 +27,11 @@ namespace ZipLib.QueueHandlers
         }
 
         protected abstract IWorker MakeWorker();
+
+        protected override void AddTotalToLog()
+        {
+            base.AddTotalToLog();
+            Logger.Add($"Поток {Thread.CurrentThread.Name} общее время работы workers {Statistic.GetTotalTime()} ms");
+        }
     }
 }

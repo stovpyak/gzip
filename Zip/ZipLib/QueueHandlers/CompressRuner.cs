@@ -24,7 +24,7 @@ namespace ZipLib.QueueHandlers
         {
             _workerCount++;
             var name = "CompressorN" + _workerCount;
-            var newWorker = new Compressor(name, Logger, NextQueue);
+            var newWorker = new Compressor(name, Logger, Statistic, NextQueue);
             return newWorker;
         }
     }

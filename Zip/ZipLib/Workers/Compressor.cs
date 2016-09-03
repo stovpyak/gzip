@@ -10,7 +10,7 @@ namespace ZipLib.Workers
     /// </summary>
     public class Compressor: WorkerBase, IWorker
     {
-        public Compressor(string name, ILogger logger, IQueue nextQueue): base(name, logger, nextQueue)
+        public Compressor(string name, ILogger logger, ProcessStatistic statistic, IQueue nextQueue): base(name, logger, statistic, nextQueue)
         {
         }
 

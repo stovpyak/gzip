@@ -8,15 +8,16 @@ namespace ZipLib.Workers
     public abstract class WorkerBase
     {
         private readonly ILogger _logger;
+        private readonly IQueue _nextQueue;
+        private readonly ProcessStatistic _statistic;
 
         private FilePart _part;
-        private readonly IQueue _nextQueue;
-
-
-        protected WorkerBase(string name, ILogger logger, IQueue nextQueue)
+        
+        protected WorkerBase(string name, ILogger logger, ProcessStatistic statistic, IQueue nextQueue)
         {
             Name = name;
             _logger = logger;
+            _statistic = statistic;
             _nextQueue = nextQueue;
         }
 
@@ -36,6 +37,7 @@ namespace ZipLib.Workers
 
             stopWatch.Stop();
             _logger.Add($"{Name}; ThreadId={Thread.CurrentThread.ManagedThreadId} закончил заботу с part {_part} за {stopWatch.ElapsedMilliseconds} ms");
+            _statistic.Add(Name, stopWatch.ElapsedMilliseconds);
             _nextQueue?.Add(_part);
         }
 

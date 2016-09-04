@@ -14,7 +14,7 @@ namespace ZipLib.QueueHandlers.Readers
 
         public int BufferSize { get; set; } = 10000;
 
-        private ArhivePortion _portionForNextPart; // todo rename portionFromPrev
+        private ArhivePortion _portionFromPrev;
         private long _totalReadByte;
 
         public override bool ReadPart(FilePart part)
@@ -24,11 +24,11 @@ namespace ZipLib.QueueHandlers.Readers
             ArhivePortion arhivePortion = null;
             while (archivePart != null)
             {
-                if (_portionForNextPart != null)
+                if (_portionFromPrev != null)
                 {
                     // используем порцию оставщуюся с предыдущей части 
-                    arhivePortion = _portionForNextPart;
-                    _portionForNextPart = null;
+                    arhivePortion = _portionFromPrev;
+                    _portionFromPrev = null;
                 }
                 else
                 {
@@ -88,14 +88,14 @@ namespace ZipLib.QueueHandlers.Readers
                                     archivePart.AppendTitleAndDataBeforeNextTitle(arhivePortion);
                                     if (arhivePortion.IsNotEmpty)
                                         // а остаток нужно "припасти" для следующей part
-                                        _portionForNextPart = arhivePortion;
+                                        _portionFromPrev = arhivePortion;
                                     arhivePortion = null;
                                 }
                                 else
                                 {
                                     // нашли заголовок для следующей части - значит текущая часть сформирована, а все что осталось в порции уже для следующей части
                                     // порцию нужно "припасти" для следующей part
-                                    _portionForNextPart = arhivePortion;
+                                    _portionFromPrev = arhivePortion;
                                     arhivePortion = null;
                                     // всё в part
                                     part.Source = archivePart.ToArray();
@@ -113,7 +113,7 @@ namespace ZipLib.QueueHandlers.Readers
                                 // всё в part
                                 part.Source = archivePart.ToArray();
                                 // порцию нужно "припасти" для следующей part
-                                _portionForNextPart = arhivePortion;
+                                _portionFromPrev = arhivePortion;
                                 return true;
                             }
                         }

@@ -2,12 +2,14 @@
 using System.IO.Compression;
 using ZipLib.Loggers;
 using ZipLib.Queues;
+using ZipLib.Strategies;
 
 namespace ZipLib.Workers
 {
     public class Decompressor: WorkerBase, IWorker
     {
-        public Decompressor(string name, ILogger logger, ProcessStatistic statistic, IQueue nextQueue): base(name, logger, statistic, nextQueue)
+        public Decompressor(string name, ILogger logger, ISystemInfoProvider systemInfoProvider, ProcessStatistic statistic, IQueue nextQueue): 
+            base(name, logger, systemInfoProvider, statistic, nextQueue)
         {
         }
 

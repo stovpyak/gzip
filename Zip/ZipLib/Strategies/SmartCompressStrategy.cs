@@ -40,12 +40,16 @@ namespace ZipLib.Strategies
         /// </summary>
         private int GetPartSize()
         {
+            // считаем что все обрабатываемые части должны занимать в памяти не больше 100 МБ (как winrar)
+            // на практике будет больше, так как GC будет их уничтожать позже
+            const int k = 100;
+            const int oneMb = 1024*1024;
+            var value = oneMb*k;
+
             // делим на 2, так как в одной части присутствует и прочитанная часть и обработанная
-            // мы заранее не знаем степень сжатия - поэтому 2 
-            var lPartSize = _systemInfoProvider.AvailableMemoryForAppl / MaxActivePartCount / 2;
-            if (lPartSize > int.MaxValue)
-                throw new Exception("размер части > int.MaxValue");
-            return (int)lPartSize;
+            // мы заранее не знаем степень сжатия - поэтому 2
+            var ulongPartSize = value/MaxActivePartCount/2;
+            return (int)ulongPartSize;
         }
     }
 }

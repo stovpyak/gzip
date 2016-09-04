@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading;
 using ZipLib.Loggers;
 using ZipLib.Queues;
+using ZipLib.Strategies;
 
 namespace ZipLib.QueueHandlers
 {
@@ -12,8 +13,8 @@ namespace ZipLib.QueueHandlers
         private readonly ManualResetEventSlim _stopEvent;
         private Stream _targetStream;
 
-        public Writer(ILogger logger, IFileNameProvider targetFileNameProvider, ManualResetEventSlim stopEvent,
-            IQueue sourceQueue, IQueue nextQueue) : base(logger, sourceQueue, nextQueue)
+        public Writer(ILogger logger, ISystemInfoProvider systemInfoProvider, IFileNameProvider targetFileNameProvider, ManualResetEventSlim stopEvent,
+            IQueue sourceQueue, IQueue nextQueue) : base(logger, systemInfoProvider, sourceQueue, nextQueue)
         {
             _targetFileNameProvider = targetFileNameProvider;
             _stopEvent = stopEvent;

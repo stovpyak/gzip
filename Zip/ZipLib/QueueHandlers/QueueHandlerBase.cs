@@ -2,6 +2,7 @@
 using System.Threading;
 using ZipLib.Loggers;
 using ZipLib.Queues;
+using ZipLib.Strategies;
 
 namespace ZipLib.QueueHandlers
 {
@@ -11,13 +12,15 @@ namespace ZipLib.QueueHandlers
     public abstract class QueueHandlerBase: IQueueHandler
     {
         protected readonly ILogger Logger;
+        protected ISystemInfoProvider SystemInfoProvider;
         protected readonly IQueue SourceQueue;
         protected readonly IQueue NextQueue;
         protected Thread InnerThread;
 
-        protected QueueHandlerBase(ILogger logger, IQueue sourceQueue, IQueue nextQueue)
+        protected QueueHandlerBase(ILogger logger, ISystemInfoProvider systemInfoProvider, IQueue sourceQueue, IQueue nextQueue)
         {
             Logger = logger;
+            SystemInfoProvider = systemInfoProvider;
             SourceQueue = sourceQueue;
             NextQueue = nextQueue;
         }
@@ -34,6 +37,7 @@ namespace ZipLib.QueueHandlers
                 var part = SourceQueue.GetPart(GetParamForGetPart());
                 if (part != null)
                 {
+                    Logger.Add($"Поток {Thread.CurrentThread.Name} перед обработкой части {part} приложение занимает в памяти {SystemInfoProvider.PagedMemorySize64} byte");
                     _stopwatchProcess.Reset();
                     _stopwatchProcess.Start();
                     if (ProcessPart(part))
@@ -43,6 +47,7 @@ namespace ZipLib.QueueHandlers
                     _stopwatchProcess.Stop();
                     TotalProcess = TotalProcess + _stopwatchProcess.ElapsedMilliseconds;
                     Logger.Add($"Поток {Thread.CurrentThread.Name} время обработки части {part} {_stopwatchWait.ElapsedMilliseconds} ms");
+                    Logger.Add($"Поток {Thread.CurrentThread.Name} после обработкой части {part} приложение занимает в памяти {SystemInfoProvider.PagedMemorySize64} byte");
                 }
                 else
                     WaitQueue();
@@ -51,31 +56,17 @@ namespace ZipLib.QueueHandlers
             AddTotalToLog();
         }
 
-        // todo: если встретится ещё подобная пара, то вынести в отдельную структуру
-        private bool _isNeedStop;
-        private readonly object _lockOnNeedStop = new object();
+        private volatile bool _isNeedStop;
 
         /// <summary>
         /// Установить признак того, что необходимо завершить выполнение
         /// </summary>
         public void SetIsNeedStop()
         {
-            lock (_lockOnNeedStop)
-            {
-                _isNeedStop = true;
-            }
+            _isNeedStop = true;
         }
 
-        private bool IsNeedStop
-        {
-            get
-            {
-                lock (_lockOnNeedStop)
-                {
-                    return _isNeedStop;
-                }
-            }
-        }
+        private bool IsNeedStop => _isNeedStop;
 
         protected virtual object GetParamForGetPart()
         {

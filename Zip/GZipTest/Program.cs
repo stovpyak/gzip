@@ -5,10 +5,6 @@ using ZipLib.Strategies;
 
 namespace GZipTest
 {
-    // todo
-    // 
-    //
-
     class Program
     {
         private static IFileNameProvider _sourceFileNameProvider;
@@ -30,26 +26,26 @@ namespace GZipTest
 
                 _sourceFileNameProvider = new FileNameProviderStub(param.SourceFileName);
                 _targetFileNameProvider = new FileNameProviderStub(param.TargetFileName);
-                
-                var appl = new Appl(logger);
+
+                var systemInfoProvider = new SystemInfoProvider();
+                var appl = new Appl(logger, systemInfoProvider);
                 switch (param.ApplMode)
                 {
                     case ApplMode.Compress:
-                        var systemInfoProvider = new SystemInfoProvider();
                         var compressStrategy = new SmartCompressStrategy(systemInfoProvider);
-                        //var compressStrategy = CompressStrategyStub.MakeByPartSize(4, 100 * 1024 * 1024);
                         appl.ExecuteCompress(compressStrategy, _sourceFileNameProvider, _targetFileNameProvider);
                         break;
                     case  ApplMode.Decompress:
+                        // todo stub заменить на умный
                         var decompressStrategy = new DecompressStrategyStub(5);
                         appl.ExecuteDecompress(decompressStrategy, _sourceFileNameProvider, _targetFileNameProvider);
                         break;
                 }
                 return 0;
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                logger.Add("Возникла ошибка при выполнении программы\r\n" + e.Message);
+                logger.Add("Возникла ошибка при выполнении программы\r\n" + ex.Message);
                 return 1;
             }
             finally

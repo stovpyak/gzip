@@ -2,6 +2,7 @@
 using System.Threading;
 using ZipLib.Loggers;
 using ZipLib.Queues;
+using ZipLib.Strategies;
 
 namespace ZipLib.Workers
 {
@@ -9,14 +10,17 @@ namespace ZipLib.Workers
     {
         private readonly ILogger _logger;
         private readonly IQueue _nextQueue;
+        private readonly ISystemInfoProvider _systemInfoProvider;
         private readonly ProcessStatistic _statistic;
+
 
         private FilePart _part;
         
-        protected WorkerBase(string name, ILogger logger, ProcessStatistic statistic, IQueue nextQueue)
+        protected WorkerBase(string name, ILogger logger, ISystemInfoProvider systemInfoProvider, ProcessStatistic statistic, IQueue nextQueue)
         {
             Name = name;
             _logger = logger;
+            _systemInfoProvider = systemInfoProvider;
             _statistic = statistic;
             _nextQueue = nextQueue;
         }
@@ -37,7 +41,7 @@ namespace ZipLib.Workers
 
             stopWatch.Stop();
             _logger.Add($"{Name}; ThreadId={Thread.CurrentThread.ManagedThreadId} закончил заботу с part {_part} за {stopWatch.ElapsedMilliseconds} ms");
-            _statistic.Add(Name, stopWatch.ElapsedMilliseconds);
+            _statistic.Add(Name, stopWatch.ElapsedMilliseconds, _systemInfoProvider.PagedMemorySize64);
             _nextQueue?.Add(_part);
         }
 

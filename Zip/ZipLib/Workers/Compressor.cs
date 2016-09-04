@@ -2,6 +2,7 @@
 using System.IO.Compression;
 using ZipLib.Loggers;
 using ZipLib.Queues;
+using ZipLib.Strategies;
 
 namespace ZipLib.Workers
 {
@@ -10,7 +11,8 @@ namespace ZipLib.Workers
     /// </summary>
     public class Compressor: WorkerBase, IWorker
     {
-        public Compressor(string name, ILogger logger, ProcessStatistic statistic, IQueue nextQueue): base(name, logger, statistic, nextQueue)
+        public Compressor(string name, ILogger logger, ISystemInfoProvider systemInfoProvide, ProcessStatistic statistic, IQueue nextQueue): 
+            base(name, logger, systemInfoProvide, statistic, nextQueue)
         {
         }
 

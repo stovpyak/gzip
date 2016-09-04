@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using ZipLib.Loggers;
 using ZipLib.Queues;
+using ZipLib.Strategies;
 using ZipLib.Workers;
 
 namespace ZipLib.QueueHandlers
@@ -9,8 +10,8 @@ namespace ZipLib.QueueHandlers
     {
         protected ProcessStatistic Statistic = new ProcessStatistic();
 
-        protected QueueHandlerWithWorkers(ILogger logger, IQueue sourceQueue, IQueue nextQueue) : 
-            base(logger, sourceQueue, nextQueue)
+        protected QueueHandlerWithWorkers(ILogger logger, ISystemInfoProvider systemInfoProvider, IQueue sourceQueue, IQueue nextQueue) : 
+            base(logger, systemInfoProvider, sourceQueue, nextQueue)
         {
         }
 
@@ -32,6 +33,7 @@ namespace ZipLib.QueueHandlers
         {
             base.AddTotalToLog();
             Logger.Add($"Поток {Thread.CurrentThread.Name} общее время работы workers {Statistic.GetTotalTime()} ms");
+            Logger.Add($"Поток {Thread.CurrentThread.Name} макимум памяти {Statistic.MaxMemory} byte");
         }
     }
 }

@@ -25,7 +25,7 @@ namespace ZipLib.Test
 
             // init
             var logger = new LoggerDummy();
-            var appl = new Appl(logger);
+            var appl = new Appl(logger, new SystemInfoProvider());
 
             var source = new FileNameProviderStub(sourceFileName);
             var archive = new FileNameProviderStub(compressedFileName);

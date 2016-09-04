@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -16,13 +17,15 @@ namespace ZipLib
     public class Appl
     {
         private readonly ILogger _logger;
+        private readonly ISystemInfoProvider _systemInfoProvider;
 
         private readonly List<IQueue> _queues = new List<IQueue>();
         private readonly List<IQueueHandler> _queueHandlers = new List<IQueueHandler>();
 
-        public Appl(ILogger logger)
+        public Appl(ILogger logger, ISystemInfoProvider systemInfoProvider)
         {
             _logger = logger;
+            _systemInfoProvider = systemInfoProvider;
         }
 
         public void ExecuteCompress(ICompressStrategy strategy, IFileNameProvider sourceFileNameProvider, 
@@ -39,6 +42,15 @@ namespace ZipLib
             if (Thread.CurrentThread.Name == null)
                 Thread.CurrentThread.Name = "Main";
             Decompress(strategy, sourceFileNameProvider, targetFileNameProvider);
+        }
+
+        private void AddSystemInfo()
+        {
+            _logger.Add($"Информация о системе:");
+            _logger.Add($"Количество процессоров= {_systemInfoProvider.ProcessorCount} шт.");
+            _logger.Add($"Всего памяти= {_systemInfoProvider.TotalPhysInGB:F2} ГБ");
+            _logger.Add($"Свободно памяти (на момент запуска)= {_systemInfoProvider.AvailPhysInGB:F2} ГБ");
+            _logger.Add(_systemInfoProvider.ApplIs64Bit ? $"Приложение x64" : $"Приложение x86");
         }
 
         private void Compress(ICompressStrategy strategy, IFileNameProvider sourceFileNameProvider, IFileNameProvider targetFileNameProvider)
@@ -58,20 +70,20 @@ namespace ZipLib
 
             var stopEvent = new ManualResetEventSlim(false);
             // создание обработчиков очередей
-            var writer = new Writer(_logger, targetFileNameProvider, stopEvent, queueForWrite, queueForRead);
+            var writer = new Writer(_logger, _systemInfoProvider, targetFileNameProvider, stopEvent, queueForWrite, queueForRead);
             _queueHandlers.Add(writer);
 
-            var archiversRuner = new CompressRuner(_logger, queueForCompress, queueForWrite);
+            var archiversRuner = new CompressRuner(_logger, _systemInfoProvider, queueForCompress, queueForWrite);
             _queueHandlers.Add(archiversRuner);
 
             var partReader = new FilePartReader(_logger, strategy);
-            var reader = new Reader(_logger, sourceFileNameProvider, partReader, queueForRead, queueForCompress);
+            var reader = new Reader(_logger, _systemInfoProvider, sourceFileNameProvider, partReader, queueForRead, queueForCompress);
             _queueHandlers.Add(reader);
 
             // вывод отладочной информации
             var sourceFileInfo = new FileInfo(sourceFileName);
             _logger.Add($"Размер файла {sourceFileInfo.Length} byte");
-
+            AddSystemInfo();
             var maxActivePartCount = strategy.MaxActivePartCount;
             _logger.Add($"Максимальное кол-во одновременно обрабатываемых частей {maxActivePartCount} шт.");
             _logger.Add($"Размер одной части {strategy.PartSize} byte");
@@ -119,18 +131,19 @@ namespace ZipLib
             
             var stopEvent = new ManualResetEventSlim(false);
             // создание обработчиков очередей
-            var writer = new Writer(_logger, targetFileNameProvider, stopEvent, queueForWrite, queueForRead);
+            var writer = new Writer(_logger, _systemInfoProvider, targetFileNameProvider, stopEvent, queueForWrite, queueForRead);
             _queueHandlers.Add(writer);
 
-            var decompressRuner = new DecompressRuner(_logger, queueForDecompress, queueForWrite);
+            var decompressRuner = new DecompressRuner(_logger, _systemInfoProvider, queueForDecompress, queueForWrite);
             _queueHandlers.Add(decompressRuner);
 
             var partReader = new ArсhivePartReader(_logger);
-            var reader = new Reader(_logger, sourceFileNameProvider, partReader, queueForRead, queueForDecompress);
+            var reader = new Reader(_logger, _systemInfoProvider, sourceFileNameProvider, partReader, queueForRead, queueForDecompress);
             _queueHandlers.Add(reader);
 
             var sourceFileInfo = new FileInfo(sourceFileName);
             _logger.Add($"Размер файла {sourceFileInfo.Length} byte");
+            AddSystemInfo();
             _logger.Add("Работа начата...");
 
             var stopWatch = new Stopwatch();

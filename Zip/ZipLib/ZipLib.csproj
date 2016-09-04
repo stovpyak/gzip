@@ -115,6 +115,7 @@
     <Compile Include="Strategies\ISystemInfoProvider.cs" />
     <Compile Include="Strategies\SmartCompressStrategy.cs" />
     <Compile Include="Strategies\CompressStrategyStub.cs" />
+    <Compile Include="Strategies\SmartDecompressStrategy.cs" />
     <Compile Include="Strategies\SystemInfoProvider.cs" />
     <Compile Include="Strategies\SystemInfoProviderStub.cs" />
     <Compile Include="Workers\Compressor.cs" />

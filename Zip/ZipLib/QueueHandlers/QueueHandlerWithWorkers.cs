@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using ZipLib.Loggers;
 using ZipLib.Queues;
 using ZipLib.Strategies;
@@ -10,8 +11,9 @@ namespace ZipLib.QueueHandlers
     {
         protected ProcessStatistic Statistic = new ProcessStatistic();
 
-        protected QueueHandlerWithWorkers(ILogger logger, ISystemInfoProvider systemInfoProvider, IQueue sourceQueue, IQueue nextQueue) : 
-            base(logger, systemInfoProvider, sourceQueue, nextQueue)
+        protected QueueHandlerWithWorkers(ILogger logger, ISystemInfoProvider systemInfoProvider, Action<Exception> applExceptionHandler, 
+            IQueue sourceQueue, IQueue nextQueue) : 
+            base(logger, systemInfoProvider, applExceptionHandler, sourceQueue, nextQueue)
         {
         }
 

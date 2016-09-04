@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.IO.Compression;
 using ZipLib.Loggers;
 using ZipLib.Queues;
@@ -8,8 +9,9 @@ namespace ZipLib.Workers
 {
     public class Decompressor: WorkerBase, IWorker
     {
-        public Decompressor(string name, ILogger logger, ISystemInfoProvider systemInfoProvider, ProcessStatistic statistic, IQueue nextQueue): 
-            base(name, logger, systemInfoProvider, statistic, nextQueue)
+        public Decompressor(string name, ILogger logger, Action<Exception> exceptionHandler, 
+            ISystemInfoProvider systemInfoProvider, ProcessStatistic statistic, IQueue nextQueue): 
+            base(name, logger, exceptionHandler, systemInfoProvider, statistic, nextQueue)
         {
         }
 

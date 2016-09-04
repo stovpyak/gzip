@@ -15,8 +15,9 @@ namespace ZipLib.QueueHandlers
         private readonly IPartReader _partReader;
         private FileStream _sourceStream;
 
-        public Reader(ILogger logger, ISystemInfoProvider systemInfoProvider, IFileNameProvider sourceFileNameProvider, IPartReader partReader,
-            IQueue sourceQueue, IQueue nextQueue): base(logger, systemInfoProvider, sourceQueue, nextQueue)
+        public Reader(ILogger logger, ISystemInfoProvider systemInfoProvider, Action<Exception> applExceptionHandler, 
+            IFileNameProvider sourceFileNameProvider, IPartReader partReader, IQueue sourceQueue, IQueue nextQueue): 
+            base(logger, systemInfoProvider, applExceptionHandler, sourceQueue, nextQueue)
         {
             _sourceFileNameProvider = sourceFileNameProvider;
             _partReader = partReader;
@@ -57,7 +58,7 @@ namespace ZipLib.QueueHandlers
                     return true;
                 }
                 Logger.Add($"!Поток {Thread.CurrentThread.Name} НЕ удалось прочитать часть {part}");
-                throw new Exception("Не удалось прочитать часть {part}");
+                throw new Exception($"Не удалось прочитать часть {part}");
             }
             catch (Exception)
             {

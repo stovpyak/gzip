@@ -36,8 +36,7 @@ namespace GZipTest
                         appl.ExecuteCompress(compressStrategy, _sourceFileNameProvider, _targetFileNameProvider);
                         break;
                     case  ApplMode.Decompress:
-                        // todo stub заменить на умный
-                        var decompressStrategy = new DecompressStrategyStub(5);
+                        var decompressStrategy = new SmartDecompressStrategy(systemInfoProvider);
                         appl.ExecuteDecompress(decompressStrategy, _sourceFileNameProvider, _targetFileNameProvider);
                         break;
                 }
@@ -45,7 +44,13 @@ namespace GZipTest
             }
             catch (Exception ex)
             {
-                logger.Add("Возникла ошибка при выполнении программы\r\n" + ex.Message);
+                logger.Add("Произошла ошибка во время выполнения программы\r\n" + 
+                    ex.Message + "\r\n" + ex.StackTrace);
+
+                if (ex.InnerException != null)
+                    logger.Add("Произошла ошибка в дочернем потоке\r\n" + 
+                        ex.InnerException.Message + "\r\n" + ex.InnerException.StackTrace);
+
                 return 1;
             }
             finally

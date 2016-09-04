@@ -39,7 +39,9 @@ namespace ZipLib
         {
             lock (_lockOn)
             {
-                return _items.Sum(item => item.ElapsedMilliseconds);
+                if (_items.Any())
+                    return _items.Sum(item => item.ElapsedMilliseconds);
+                return 0;
             }
         }
 
@@ -49,7 +51,9 @@ namespace ZipLib
             {
                 lock (_lockOn)
                 {
-                    return _items.Max(item => item.CurrentMemory);
+                    if (_items.Any())
+                        return _items.Max(item => item.CurrentMemory);
+                    return 0;
                 }
             }
         }

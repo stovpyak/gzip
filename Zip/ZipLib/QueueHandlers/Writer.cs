@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using ZipLib.Loggers;
@@ -13,8 +14,9 @@ namespace ZipLib.QueueHandlers
         private readonly ManualResetEventSlim _stopEvent;
         private Stream _targetStream;
 
-        public Writer(ILogger logger, ISystemInfoProvider systemInfoProvider, IFileNameProvider targetFileNameProvider, ManualResetEventSlim stopEvent,
-            IQueue sourceQueue, IQueue nextQueue) : base(logger, systemInfoProvider, sourceQueue, nextQueue)
+        public Writer(ILogger logger, ISystemInfoProvider systemInfoProvider, Action<Exception> applExceptionHandler, 
+            IFileNameProvider targetFileNameProvider, ManualResetEventSlim stopEvent, IQueue sourceQueue, IQueue nextQueue) : 
+            base(logger, systemInfoProvider, applExceptionHandler, sourceQueue, nextQueue)
         {
             _targetFileNameProvider = targetFileNameProvider;
             _stopEvent = stopEvent;

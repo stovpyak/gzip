@@ -2,16 +2,11 @@
 {
     public class DecompressStrategyStub: IDecompressStrategy
     {
-        private readonly int _maxActivePartCount;
-
         public DecompressStrategyStub(int maxActivePartCount)
         {
-            _maxActivePartCount = maxActivePartCount;
+            MaxActivePartCount = maxActivePartCount;
         }
 
-        public int GetMaxActivePartCount()
-        {
-            return _maxActivePartCount;
-        }
+        public int MaxActivePartCount { get; }
     }
 }

@@ -21,6 +21,8 @@ namespace ZipLib
 
         private readonly List<IQueue> _queues = new List<IQueue>();
         private readonly List<IQueueHandler> _queueHandlers = new List<IQueueHandler>();
+        private ManualResetEventSlim _stopEvent;
+        private readonly Stopwatch _stopWatch = new Stopwatch();
 
         public Appl(ILogger logger, ISystemInfoProvider systemInfoProvider)
         {
@@ -55,6 +57,7 @@ namespace ZipLib
 
         private void Compress(ICompressStrategy strategy, IFileNameProvider sourceFileNameProvider, IFileNameProvider targetFileNameProvider)
         {
+            _wasException = null;
             var sourceFileName = sourceFileNameProvider.GetFileName();
             if (!File.Exists(sourceFileName))
                 throw new FileNotFoundException($"Не найден файл {sourceFileName}");
@@ -68,16 +71,16 @@ namespace ZipLib
             var queueForWrite = new IndexedParts("ForWrite", loggerForQueue);
             _queues.Add(queueForWrite);
 
-            var stopEvent = new ManualResetEventSlim(false);
+            _stopEvent = new ManualResetEventSlim(false);
             // создание обработчиков очередей
-            var writer = new Writer(_logger, _systemInfoProvider, targetFileNameProvider, stopEvent, queueForWrite, queueForRead);
+            var writer = new Writer(_logger, _systemInfoProvider, ApplExceptionHandler, targetFileNameProvider, _stopEvent, queueForWrite, queueForRead);
             _queueHandlers.Add(writer);
 
-            var archiversRuner = new CompressRuner(_logger, _systemInfoProvider, queueForCompress, queueForWrite);
+            var archiversRuner = new CompressRuner(_logger, _systemInfoProvider, ApplExceptionHandler, queueForCompress, queueForWrite);
             _queueHandlers.Add(archiversRuner);
 
             var partReader = new FilePartReader(_logger, strategy);
-            var reader = new Reader(_logger, _systemInfoProvider, sourceFileNameProvider, partReader, queueForRead, queueForCompress);
+            var reader = new Reader(_logger, _systemInfoProvider, ApplExceptionHandler, sourceFileNameProvider, partReader, queueForRead, queueForCompress);
             _queueHandlers.Add(reader);
 
             // вывод отладочной информации
@@ -89,8 +92,8 @@ namespace ZipLib
             _logger.Add($"Размер одной части {strategy.PartSize} byte");
             _logger.Add("Работа начата...");
 
-            var stopWatch = new Stopwatch();
-            stopWatch.Start();
+            _stopWatch.Reset();
+            _stopWatch.Start();
 
             for (var i = 0; i < maxActivePartCount; i++)
             {
@@ -98,16 +101,7 @@ namespace ZipLib
                 queueForRead.Add(part);
             }
 
-            // здесь выполнение остановится, пока кто нибудь не просигнализирует об окончании работы
-            stopEvent.Wait();
-            stopWatch.Stop();
-
-            Stop();
-            ShowInfo();
-            _queueHandlers.Clear();
-            _queues.Clear();
-
-            _logger.Add($"Работа завершена. Общее время работы {stopWatch.ElapsedMilliseconds} ms");
+            StopEventWait();
         }
 
         private void Decompress(IDecompressStrategy strategy, IFileNameProvider sourceFileNameProvider, IFileNameProvider targetFileNameProvider)
@@ -116,6 +110,7 @@ namespace ZipLib
             // они начинаются с 10 байт (31,139,8,0,0,0,0,0,4,0)
             // эти части по отдельности отдавать на декомпрессию
 
+            _wasException = null;
             var sourceFileName = sourceFileNameProvider.GetFileName();
             if (!File.Exists(sourceFileName))
                 throw new FileNotFoundException($"Не найден файл {sourceFileName}");
@@ -129,16 +124,16 @@ namespace ZipLib
             var queueForWrite = new IndexedParts("ForWrite", loggerForQueue);
             _queues.Add(queueForWrite);
             
-            var stopEvent = new ManualResetEventSlim(false);
+            _stopEvent = new ManualResetEventSlim(false);
             // создание обработчиков очередей
-            var writer = new Writer(_logger, _systemInfoProvider, targetFileNameProvider, stopEvent, queueForWrite, queueForRead);
+            var writer = new Writer(_logger, _systemInfoProvider, ApplExceptionHandler, targetFileNameProvider, _stopEvent, queueForWrite, queueForRead);
             _queueHandlers.Add(writer);
 
-            var decompressRuner = new DecompressRuner(_logger, _systemInfoProvider, queueForDecompress, queueForWrite);
+            var decompressRuner = new DecompressRuner(_logger, _systemInfoProvider, ApplExceptionHandler, queueForDecompress, queueForWrite);
             _queueHandlers.Add(decompressRuner);
 
             var partReader = new ArсhivePartReader(_logger);
-            var reader = new Reader(_logger, _systemInfoProvider, sourceFileNameProvider, partReader, queueForRead, queueForDecompress);
+            var reader = new Reader(_logger, _systemInfoProvider, ApplExceptionHandler, sourceFileNameProvider, partReader, queueForRead, queueForDecompress);
             _queueHandlers.Add(reader);
 
             var sourceFileInfo = new FileInfo(sourceFileName);
@@ -146,24 +141,40 @@ namespace ZipLib
             AddSystemInfo();
             _logger.Add("Работа начата...");
 
-            var stopWatch = new Stopwatch();
-            stopWatch.Start();
+            _stopWatch.Reset();
+            _stopWatch.Start();
 
-            for (var i = 0; i < strategy.GetMaxActivePartCount(); i++)
+            for (var i = 0; i < strategy.MaxActivePartCount; i++)
             {
                 var part = new FilePart($"FilePart{i + 1}");
                 queueForRead.Add(part);
             }
 
+            StopEventWait();
+        }
+
+        private void StopEventWait()
+        {
             // здесь выполнение остановится, пока кто нибудь не просигнализирует об окончании работы
-            stopEvent.Wait();
-            stopWatch.Stop();
+            _stopEvent.Wait();
+            _stopWatch.Stop();
 
             Stop();
             ShowInfo();
             _queueHandlers.Clear();
             _queues.Clear();
-            _logger.Add($"Работа завершена. Общее время работы {stopWatch.ElapsedMilliseconds} ms");
+
+            if (_wasException != null)
+                throw new Exception("Ошибка в дочернем потоке", _wasException);
+
+            _logger.Add($"Работа завершена. Общее время работы {_stopWatch.ElapsedMilliseconds} ms");
+        }
+
+        private Exception _wasException;
+        private void ApplExceptionHandler(Exception ex)
+        {
+            _wasException = ex;
+            _stopEvent.Set();
         }
 
         public void ShowInfo()
@@ -176,10 +187,8 @@ namespace ZipLib
         {
             foreach (var queueHandler in _queueHandlers)
                 queueHandler.SetIsNeedStop();
-
             foreach (var queue in _queues)
                 queue.NotifyEndWait();
-
             foreach (var queueHandler in _queueHandlers)
                 queueHandler.Join();
         }

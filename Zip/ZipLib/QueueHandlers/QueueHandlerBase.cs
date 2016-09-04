@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.Diagnostics;
 using System.Threading;
 using ZipLib.Loggers;
 using ZipLib.Queues;
@@ -13,14 +14,17 @@ namespace ZipLib.QueueHandlers
     {
         protected readonly ILogger Logger;
         protected ISystemInfoProvider SystemInfoProvider;
+        protected Action<Exception> ApplExceptionHandler;
         protected readonly IQueue SourceQueue;
         protected readonly IQueue NextQueue;
         protected Thread InnerThread;
 
-        protected QueueHandlerBase(ILogger logger, ISystemInfoProvider systemInfoProvider, IQueue sourceQueue, IQueue nextQueue)
+        protected QueueHandlerBase(ILogger logger, ISystemInfoProvider systemInfoProvider, Action<Exception> applExceptionHandler, 
+            IQueue sourceQueue, IQueue nextQueue)
         {
             Logger = logger;
             SystemInfoProvider = systemInfoProvider;
+            ApplExceptionHandler = applExceptionHandler;
             SourceQueue = sourceQueue;
             NextQueue = nextQueue;
         }
@@ -32,28 +36,38 @@ namespace ZipLib.QueueHandlers
 
         protected void Run()
         {
-            while (!IsNeedStop)
+            try
             {
-                var part = SourceQueue.GetPart(GetParamForGetPart());
-                if (part != null)
+                while (!IsNeedStop)
                 {
-                    Logger.Add($"Поток {Thread.CurrentThread.Name} перед обработкой части {part} приложение занимает в памяти {SystemInfoProvider.PagedMemorySize64} byte");
-                    _stopwatchProcess.Reset();
-                    _stopwatchProcess.Start();
-                    if (ProcessPart(part))
+                    var part = SourceQueue.GetPart(GetParamForGetPart());
+                    if (part != null)
                     {
-                        _processedPartCount++;
+                        Logger.Add(
+                            $"Поток {Thread.CurrentThread.Name} перед обработкой части {part} приложение занимает в памяти {SystemInfoProvider.PagedMemorySize64} byte");
+                        _stopwatchProcess.Reset();
+                        _stopwatchProcess.Start();
+                        if (ProcessPart(part))
+                        {
+                            _processedPartCount++;
+                        }
+                        _stopwatchProcess.Stop();
+                        TotalProcess = TotalProcess + _stopwatchProcess.ElapsedMilliseconds;
+                        Logger.Add(
+                            $"Поток {Thread.CurrentThread.Name} время обработки части {part} {_stopwatchWait.ElapsedMilliseconds} ms");
+                        Logger.Add(
+                            $"Поток {Thread.CurrentThread.Name} после обработкой части {part} приложение занимает в памяти {SystemInfoProvider.PagedMemorySize64} byte");
                     }
-                    _stopwatchProcess.Stop();
-                    TotalProcess = TotalProcess + _stopwatchProcess.ElapsedMilliseconds;
-                    Logger.Add($"Поток {Thread.CurrentThread.Name} время обработки части {part} {_stopwatchWait.ElapsedMilliseconds} ms");
-                    Logger.Add($"Поток {Thread.CurrentThread.Name} после обработкой части {part} приложение занимает в памяти {SystemInfoProvider.PagedMemorySize64} byte");
+                    else
+                        WaitQueue();
                 }
-                else
-                    WaitQueue();
+                Close();
+                AddTotalToLog();
             }
-            Close();
-            AddTotalToLog();
+            catch (Exception ex)
+            {
+                ApplExceptionHandler(ex);
+            }
         }
 
         private volatile bool _isNeedStop;

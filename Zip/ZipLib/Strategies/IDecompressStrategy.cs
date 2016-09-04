@@ -2,6 +2,6 @@
 {
     public interface IDecompressStrategy
     {
-        int GetMaxActivePartCount();
+        int MaxActivePartCount { get; }
     }
 }

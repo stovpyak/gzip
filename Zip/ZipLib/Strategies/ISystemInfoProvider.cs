@@ -12,18 +12,6 @@
         /// </summary>
         long PagedMemorySize64 { get; }
 
-        /// <summary>
-        /// Всего памяти 
-        /// </summary>
-        ulong TotalPhysInByte { get; }
-        double TotalPhysInGB { get; }
-
-        /// <summary>
-        /// Свободной памяти
-        /// </summary>
-        ulong AvailPhysInByte { get; }
-        double AvailPhysInGB { get; }
-
         bool ApplIs64Bit { get; }
     }
 }

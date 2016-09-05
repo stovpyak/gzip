@@ -50,8 +50,6 @@ namespace ZipLib
         {
             _logger.Add($"Информация о системе:");
             _logger.Add($"Количество процессоров= {_systemInfoProvider.ProcessorCount} шт.");
-            _logger.Add($"Всего памяти= {_systemInfoProvider.TotalPhysInGB:F2} ГБ");
-            _logger.Add($"Свободно памяти (на момент запуска)= {_systemInfoProvider.AvailPhysInGB:F2} ГБ");
             _logger.Add(_systemInfoProvider.ApplIs64Bit ? $"Приложение x64" : $"Приложение x86");
         }
 

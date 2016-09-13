@@ -70,6 +70,7 @@
   <ItemGroup>
     <Compile Include="TestArchivePartReader\ExpectedException.cs" />
     <Compile Include="TestArchivePartReader\OnePart.cs" />
+    <Compile Include="TestArchivePartReader\OnePartDataWithPartTitle.cs" />
     <Compile Include="TestArchivePartReader\OnlyTitle.cs" />
     <Compile Include="TestArchivePartReader\EmptyStream.cs" />
     <Compile Include="TestArchivePartReader\TestArhivePartReaderBase.cs" />

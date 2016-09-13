@@ -29,9 +29,7 @@ namespace ZipLib
         {
             lock (_lockOn)
             {
-                long sum = 0;
-                foreach (var item in _items)
-                    sum = sum + item.ElapsedMilliseconds;
+                long sum = _items.Aggregate<InfoItem, long>(0, (current, item) => current + item.ElapsedMilliseconds);
                 return sum/_items.Count;
             }
         }

@@ -25,11 +25,6 @@
             return instance;
         }
 
-        public static TitleInfo MakeNotFount()
-        {
-            return new TitleInfo();
-        }
-
         private TitleInfo()
         {
             IndexStartTitle = -1;
@@ -38,11 +33,6 @@
         public TitleMode Mode { get; set; }
 
         public int IndexStartTitle { get; set; }
-        
-        public bool IsNotFound()
-        {
-            return (IndexStartTitle == -1);
-        }
     }
 
     public enum TitleMode

@@ -72,15 +72,26 @@ namespace ZipLib.QueueHandlers.Readers
                                 archivePart.AppendTitleAndDataBeforeNextTitle(arhivePortion);
                                 if (arhivePortion.IsNotEmpty)
                                 {
-                                    // если остаток порции не пустой, то начался новый заголовок - текущая чать прочитана
-                                    // всё в part
-                                    part.Source = archivePart.ToArray();
-                                    // а остаток нужно "припасти" для следующей part
-                                    _portionFromPrev = arhivePortion;
-                                    return true;
+                                    // если остаток порции не пустой, то возможно начался новый заголовок
+                                    // в остатке есть заголовок полностью
+                                    if (arhivePortion.IsExistsAllTitle)
+                                    {
+                                        // всё в part
+                                        part.Source = archivePart.ToArray();
+                                        // а остаток нужно "припасти" для следующей part
+                                        _portionFromPrev = arhivePortion;
+                                        return true;
+                                    }
+                                    // в остатке есть заголовок, но не полностью
+                                    // !!! окончить текущую часть не имеем права - не удостоверившись, что это заголовок
+                                    // поэтому здесь ничего не делаем
+                                    // ... и далее на чтение следующей порции
                                 }
-                                arhivePortion = null;
-                                // ... и дальше на чтение следующей порции
+                                else
+                                {
+                                    arhivePortion = null;
+                                    // ... и дальше на чтение следующей порции
+                                }
                             }
                             else
                             {

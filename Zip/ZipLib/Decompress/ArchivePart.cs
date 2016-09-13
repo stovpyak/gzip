@@ -4,7 +4,7 @@ using System.IO;
 namespace ZipLib.Decompress
 {
     /// <summary>
-    /// Часть архива - полностью пригодная для декомпресси
+    /// Часть архива - полностью пригодная для декомпрессии
     /// Заголовок + данные
     /// </summary>
     public class ArchivePart
@@ -45,8 +45,6 @@ namespace ZipLib.Decompress
         }
 
         public bool IsEmpty => _stream == null;
-
-        public bool IsNotEmpty => !IsEmpty;
 
         public byte[] ToArray()
         {

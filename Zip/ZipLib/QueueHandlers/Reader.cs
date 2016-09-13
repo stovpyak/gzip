@@ -22,7 +22,7 @@ namespace ZipLib.QueueHandlers
             _sourceFileNameProvider = sourceFileNameProvider;
             _partReader = partReader;
 
-            InnerThread = new Thread(this.Run) { Name = "Reader" };
+            InnerThread = new Thread(Run) { Name = "Reader" };
             InnerThread.Start();
         }
 

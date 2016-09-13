@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ZipLib.Strategies
+﻿namespace ZipLib.Strategies
 {
     public class SystemInfoProviderStub: ISystemInfoProvider
     {

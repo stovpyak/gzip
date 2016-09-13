@@ -44,18 +44,26 @@ namespace GZipTest
             }
             catch (Exception ex)
             {
-                logger.Add("Произошла ошибка во время выполнения программы\r\n" + 
+                logger.Add("Произошла ошибка. Выполнение программы будет завершено\r\n" + 
                     ex.Message + "\r\n" + ex.StackTrace);
 
-                if (ex.InnerException != null)
-                    logger.Add("Произошла ошибка в дочернем потоке\r\n" + 
-                        ex.InnerException.Message + "\r\n" + ex.InnerException.StackTrace);
+                AddInnerExceptionToLog(ex, logger);
 
                 return 1;
             }
             finally
             {
                 logger.Close();
+            }
+        }
+
+        private static void AddInnerExceptionToLog(Exception ex, ILogger logger)
+        {
+            if (ex.InnerException != null)
+            {
+                logger.Add("Произошла ошибка.\r\n" +
+                           ex.InnerException.Message + "\r\n" + ex.InnerException.StackTrace);
+                AddInnerExceptionToLog(ex.InnerException, logger);
             }
         }
     }

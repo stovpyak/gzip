@@ -5,10 +5,10 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ZipLib.Loggers;
 using ZipLib.QueueHandlers.Readers;
 
-namespace ZipLib.Test
+namespace ZipLib.Test.TestArchivePartReader
 {
     [TestClass]
-    public class TestArhivePartReader
+    public class TestArhivePartReader: TestArhivePartReaderBase
     {
         [TestMethod]
         public void TestEmptyStream()
@@ -108,52 +108,18 @@ namespace ZipLib.Test
             }
         }
 
-        [TestMethod]
-        public void TestTitleAndDataBigBuffer()
-        {
-            TestOnlyTitle(1000);
-        }
-
-        [TestMethod]
-        public void TestTitleAndDataSmallBuffer()
-        {
-            TestOnlyTitle(5);
-        }
-
-
-        public void TestTitleAndData(int bufferSize)
-        {
-            var input = new byte[] { 31, 139, 8, 0, 0, 0, 0, 0, 4, 0, 1 };
-            var inputStream = MakeInputStream(input);
-            try
-            {
-                var reader = new ArсhivePartReader(new LoggerDummy());
-                reader.Init(inputStream, input.Length);
-                reader.BufferSize = bufferSize;
-                var part = new FilePart("dummyName");
-                var res = reader.ReadPart(part);
-
-                Assert.IsTrue(res, "не удалось проинициализировать часть");
-                Assert.IsNotNull(part.Source, "part.Source = null");
-                Assert.IsTrue(input.SequenceEqual(part.Source), "неверный part.Source");
-                Assert.IsTrue(part.IsLast, "part.IsLast");
-            }
-            finally
-            {
-                inputStream.Close();
-            }
-        }
+      
 
         [TestMethod]
         public void TestTitleDataAndSecondTitleBigBuffer()
         {
-            TestOnlyTitle(1000);
+            TestTitleDataAndSecondTitle(1000);
         }
 
         [TestMethod]
         public void TestTitleDataAndSecondTitleSmallBuffer()
         {
-            TestOnlyTitle(5);
+            TestTitleDataAndSecondTitle(5);
         }
 
         public void TestTitleDataAndSecondTitle(int bufferSize)
@@ -190,14 +156,7 @@ namespace ZipLib.Test
             }
         }
 
-        private Stream MakeInputStream(byte[] input)
-        {
-            var inputStream = new MemoryStream();
-            inputStream.Write(input, 0, input.Length);
-            inputStream.Seek(0, SeekOrigin.Begin);
 
-            return inputStream;
-        }
 
 
     }

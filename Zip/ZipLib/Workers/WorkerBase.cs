@@ -32,12 +32,24 @@ namespace ZipLib.Workers
         {
             try
             {
+                SafeProcessPart(part);
+            }
+            catch (Exception ex)
+            {
+                _exceptionHandler(ex);
+            }
+        }
+
+        private void SafeProcessPart(FilePart part)
+        {
+            try
+            {
                 _part = part;
                 ThreadPool.QueueUserWorkItem(Run);
             }
             catch (Exception ex)
             {
-                _exceptionHandler(ex);
+                throw new WorkerException("Произошла ошибка в worker", ex); ;
             }
         }
 

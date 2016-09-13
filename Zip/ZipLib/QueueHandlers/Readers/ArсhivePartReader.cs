@@ -35,12 +35,15 @@ namespace ZipLib.QueueHandlers.Readers
                     // читаем порцию из файла 
                     var buffer = new byte[BufferSize];
                     var count = SourceStream.Read(buffer, 0, buffer.Length);
+
                     if (count > 0)
                     {
+                        _totalReadByte = _totalReadByte + count;
+
                         if (arhivePortion == null)
                             arhivePortion = new ArhivePortion(new BytesBuffer(buffer, 0, count - 1));
                         else
-                        // предыдущая порция закончилась на части заголовка
+                            // предыдущая порция закончилась на части заголовка
                             arhivePortion.Append(new BytesBuffer(buffer, 0, count - 1));
                     }
                     else
@@ -48,93 +51,84 @@ namespace ZipLib.QueueHandlers.Readers
                         // всё в part
                         part.Source = archivePart.ToArray();
                         part.IsLast = true;
-                        return true;
-                    }
-
-                    _totalReadByte = _totalReadByte + count;
-                    // прочитали всё - у части выставляем признак, что она последняя
-                    if (_totalReadByte == SourceFileSize)
-                    {
-                        part.IsLast = true;
                         Logger.Add($"Поток {Thread.CurrentThread.Name} прочитал последнюю часть файла {part} ");
+                        return true;
                     }
                 }
 
-                if (arhivePortion != null)
+                // нашли заголовок
+                if (arhivePortion.IsExistsTitle)
                 {
-                    // не нашли заголовков
-                    if (!arhivePortion.IsExistsTitle)
+                    // нашли заголовок полностью
+                    if (arhivePortion.IsExistsAllTitle)
                     {
-                        if (archivePart.IsEmpty)
-                            throw new FormatException("Часть ещё пустая, а в порции нет заголовка - неверный формат архива");
-
-                        // всю прочитанную порцию архива в часть
-                        archivePart.AppendAllPortion(arhivePortion);
-                        Debug.Assert(arhivePortion.IsEmpty, "Всё извлекли из порции, а она всё равно не пустая");
-                        arhivePortion = null;
-                    }
-                    else
-                    {
-                        // нашли заголовок полностью
-                        if (arhivePortion.IsExistsAllTitle)
+                        // заголовок в начале
+                        if (arhivePortion.StartsWithTitle)
                         {
-                            // заголовок в начале
-                            if (arhivePortion.StartsWithTitle)
+                            // часть архива пустая - нашли заголовок для текущей части
+                            if (archivePart.IsEmpty)
                             {
-                                // часть архива пустая - нашли заголовок для текущей части
-                                if (archivePart.IsEmpty)
+                                // записываем в часть все что до следующего заголовка
+                                archivePart.AppendTitleAndDataBeforeNextTitle(arhivePortion);
+                                if (arhivePortion.IsNotEmpty)
                                 {
-                                    // записываем в часть все что до следеющего заголовка
-                                    archivePart.AppendTitleAndDataBeforeNextTitle(arhivePortion);
-                                    if (arhivePortion.IsNotEmpty)
-                                        // а остаток нужно "припасти" для следующей part
-                                        _portionFromPrev = arhivePortion;
-                                    arhivePortion = null;
-                                }
-                                else
-                                {
-                                    // нашли заголовок для следующей части - значит текущая часть сформирована, а все что осталось в порции уже для следующей части
-                                    // порцию нужно "припасти" для следующей part
-                                    _portionFromPrev = arhivePortion;
-                                    arhivePortion = null;
+                                    // если остаток порции не пустой, то начался новый заголовок - текущая чать прочитана
                                     // всё в part
                                     part.Source = archivePart.ToArray();
-                                    archivePart = null;
+                                    // а остаток нужно "припасти" для следующей part
+                                    _portionFromPrev = arhivePortion;
+                                    return true;
                                 }
+                                arhivePortion = null;
+                                // ... и дальше на чтение следующей порции
                             }
                             else
                             {
-                                // заголовок не в начале порции
-                                if (archivePart.IsEmpty)
-                                    throw new FormatException($"part {part}. archivePart ещё пустая, а в порции заголовок не в начале - неверный формат архива");
-
-                                // добавляем в часть всё что до заголовка
-                                archivePart.AppendDataBeforeTitle(arhivePortion);
-                                // всё в part
-                                part.Source = archivePart.ToArray();
+                                // нашли заголовок для следующей части - значит текущая часть сформирована, а все что осталось в порции уже для следующей части
                                 // порцию нужно "припасти" для следующей part
                                 _portionFromPrev = arhivePortion;
+                                // всё в part
+                                part.Source = archivePart.ToArray();
                                 return true;
                             }
                         }
                         else
                         {
-                            // нашли заголовок не полностью
-                            // !!! окончить текущую часть не имеем права - не удостоверившись, что это заголовок
-                            // поэтому здесь ничего не делаем, а выше прочитаем дополнительную порцию
+                            // заголовок не в начале порции
+                            if (archivePart.IsEmpty)
+                                throw new FormatException(
+                                    $"part {part}. archivePart ещё пустая, а в порции заголовок не в начале - неверный формат архива");
+
+                            // добавляем в часть всё что до заголовка
+                            archivePart.AppendDataBeforeTitle(arhivePortion);
+                            // всё в part
+                            part.Source = archivePart.ToArray();
+                            // порцию нужно "припасти" для следующей part
+                            _portionFromPrev = arhivePortion;
+                            return true;
                         }
+                    }
+                    else
+                    {
+                        // нашли заголовок не полностью
+                        // !!! окончить текущую часть не имеем права - не удостоверившись, что это заголовок
+                        // поэтому здесь ничего не делаем
+                        // ... и далее на чтение следующей порции
                     }
                 }
                 else
                 {
-                    // архив закончился
+                    // заголовок не нашли в порции
                     if (archivePart.IsEmpty)
-                        return false;
-                    part.Source = archivePart.ToArray();
-                    return true;
+                        throw new FormatException("Часть ещё пустая, а в порции нет заголовка - неверный формат архива");
+                    // всю прочитанную порцию архива в часть
+                    archivePart.AppendAllPortion(arhivePortion);
+                    Debug.Assert(arhivePortion.IsEmpty, "Всё извлекли из порции, а она всё равно не пустая");
+                    arhivePortion = null;
+                    // ... и далее на чтение следующей порции
                 }
             }
-            return false;
+            throw new Exception("Обнаружена неправильная работа ArсhivePartReader");
         }
     }
 }

@@ -68,7 +68,13 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="TestArhivePartReader.cs" />
+    <Compile Include="TestArchivePartReader\ExpectedException.cs" />
+    <Compile Include="TestArchivePartReader\OnePart.cs" />
+    <Compile Include="TestArchivePartReader\OnlyTitle.cs" />
+    <Compile Include="TestArchivePartReader\EmptyStream.cs" />
+    <Compile Include="TestArchivePartReader\TestArhivePartReaderBase.cs" />
+    <Compile Include="TestArchivePartReader\TitleDataAndSecondTitle.cs" />
+    <Compile Include="TestArchivePartReader\TwoPart.cs" />
     <Compile Include="TestArhivePortion\TestAppend.cs" />
     <Compile Include="TestArhivePortion\TestExtractDataBeforeTitle.cs" />
     <Compile Include="TestArhivePortion\TestExtractFirstTitleAndData.cs" />

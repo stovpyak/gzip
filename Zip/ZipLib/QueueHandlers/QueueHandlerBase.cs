@@ -34,7 +34,7 @@ namespace ZipLib.QueueHandlers
 
         private int _processedPartCount;
 
-        protected void Run()
+        private void SafeRun()
         {
             try
             {
@@ -54,7 +54,7 @@ namespace ZipLib.QueueHandlers
                         _stopwatchProcess.Stop();
                         TotalProcess = TotalProcess + _stopwatchProcess.ElapsedMilliseconds;
                         Logger.Add(
-                            $"Поток {Thread.CurrentThread.Name} время обработки части {part} {_stopwatchWait.ElapsedMilliseconds} ms");
+                            $"Поток {Thread.CurrentThread.Name} время обработки части {part} {_stopwatchProcess.ElapsedMilliseconds} ms");
                         Logger.Add(
                             $"Поток {Thread.CurrentThread.Name} после обработкой части {part} приложение занимает в памяти {SystemInfoProvider.PagedMemorySize64} byte");
                     }
@@ -63,6 +63,18 @@ namespace ZipLib.QueueHandlers
                 }
                 Close();
                 AddTotalToLog();
+            }
+            catch (Exception ex)
+            {
+                throw new QueueHandlerException("Произошла ошибка в обработчике очереди", ex);
+            }
+        }
+
+        protected void Run()
+        {
+            try
+            {
+                SafeRun();
             }
             catch (Exception ex)
             {

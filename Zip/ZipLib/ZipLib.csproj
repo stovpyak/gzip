@@ -97,6 +97,7 @@
     <Compile Include="QueueHandlers\DecompressRuner.cs" />
     <Compile Include="QueueHandlers\IQueueHandler.cs" />
     <Compile Include="QueueHandlers\QueueHandlerBase.cs" />
+    <Compile Include="QueueHandlers\QueueHandlerException.cs" />
     <Compile Include="QueueHandlers\QueueHandlerWithWorkers.cs" />
     <Compile Include="QueueHandlers\Reader.cs" />
     <Compile Include="QueueHandlers\Readers\ArсhivePartReader.cs" />
@@ -121,6 +122,7 @@
     <Compile Include="Workers\Decompressor.cs" />
     <Compile Include="Workers\IWorker.cs" />
     <Compile Include="Workers\WorkerBase.cs" />
+    <Compile Include="Workers\WorkerException.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

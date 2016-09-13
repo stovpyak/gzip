@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ZipLib.Workers
+﻿namespace ZipLib.Workers
 {
     public interface IWorker
     {
